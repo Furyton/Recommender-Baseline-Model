@@ -11,9 +11,8 @@ parser = argparse.ArgumentParser(description='RecPlay')
 ################
 # Top Level
 ################
-parser.add_argument('--mode', type=str, default='train', choices=['train'])
+parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'])
 parser.add_argument('--template', type=str, default=None)
-parser.add_argument('--original', type=int, default=1)
 ################
 # Test
 ################
@@ -22,9 +21,9 @@ parser.add_argument('--test_model_path', type=str, default=None)
 ################
 # Dataset
 ################
-parser.add_argument('--min_rating', type=int, default=4, help='Only keep ratings greater than equal to this value')
-parser.add_argument('--min_uc', type=int, default=5, help='Only keep users with more than min_uc ratings')
-parser.add_argument('--min_sc', type=int, default=0, help='Only keep items with more than min_sc ratings')
+# parser.add_argument('--min_rating', type=int, default=4, help='Only keep ratings greater than equal to this value')
+# parser.add_argument('--min_uc', type=int, default=5, help='Only keep users with more than min_uc ratings')
+# parser.add_argument('--min_sc', type=int, default=0, help='Only keep items with more than min_sc ratings')
 parser.add_argument('--split', type=str, default='leave_one_out', help='How to split the datasets')
 
 ################
@@ -55,7 +54,7 @@ parser.add_argument('--trainer_code', type=str, default='bert', choices=TRAINERS
 # device #
 parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'cuda'])
 parser.add_argument('--num_gpu', type=int, default=1)
-parser.add_argument('--device_idx', type=str, default='0')
+parser.add_argument('--device_idx', type=str, default='0') # [0, 1, 2 ... ]
 # optimizer #
 parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam'])
 parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
@@ -96,4 +95,4 @@ parser.add_argument('--data_dir', type=str, default=None)
 parser.add_argument('--path', type=str, default=None)
 ################
 args = parser.parse_args()
-set_template(args)
+# set_template(args)

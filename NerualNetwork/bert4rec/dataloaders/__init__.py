@@ -15,7 +15,7 @@ def data_partition(fname, max_len, prop_sliding_window):
     user_valid = []
     user_test = []
     # assume user/item index starting from 1
-    f = open(fname, 'r')
+    f = open('../Data/' + fname, 'r')
     for line in f:
         u, i = line.rstrip().split(' ')
         u = int(u)

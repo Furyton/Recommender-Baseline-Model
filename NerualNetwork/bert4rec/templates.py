@@ -2,7 +2,6 @@ def set_template(args):
     args.mode = 'train'
 
     args.split = 'leave_one_out'
-    args.original = 1
     args.dataloader_code = 'bert'
     batch = 64
     args.train_batch_size = batch
@@ -35,9 +34,9 @@ def set_template(args):
     args.bert_dropout = 0.25
     args.bert_hidden_dropout = 0.25
 
-    args.data_dir = '/data/lizongbu-slurm/wushiguang/2021/ml/bert/bert4rec/Data/ml.txt'
+    args.data_dir = 'ml.txt'
 
-    args.path = "/data/lizongbu-slurm/wushiguang/2021/ml/bert/bert4rec/experiments/test_2021-01-19_11/models/best_acc_model.pth"
+    args.path = None
 
     args.bert_hidden_units = 64
     args.bert_mask_prob = 0.3
