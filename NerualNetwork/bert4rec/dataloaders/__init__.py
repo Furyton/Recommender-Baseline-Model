@@ -2,6 +2,10 @@ from collections import defaultdict
 
 from .bert import BertDataloader
 
+import pickle
+
+from os import path
+
 DATALOADERS = {
     BertDataloader.code(): BertDataloader,
 }
@@ -44,7 +48,7 @@ def data_partition(fname, max_len, prop_sliding_window):
 
     for i in range(usernum):
         if len(data[i]) < 3:
-            print("HERE")
+            continue
         user_train.append(data[i][:-2])
         # user_valid[i] = []
         user_valid.append([data[i][-2]])
@@ -54,9 +58,12 @@ def data_partition(fname, max_len, prop_sliding_window):
     return [user_train, user_valid, user_test, usernum, itemnum]
 
 
-
 def dataloader_factory(args):
-    dataset = data_partition(args.data_dir, args.bert_max_len, args.prop_sliding_window)
+    if args.load_processed_dataset:
+        dataset = pickle.load(open(args.processed_dataset_path, 'rb'))
+    else:
+        dataset = data_partition(args.data_name, args.bert_max_len, args.prop_sliding_window)
+        pickle.dump(dataset, open("../Data/Processed/" + args.data_name + "_processed.p", "wb"))
     dataloader = DATALOADERS[args.dataloader_code]
     dataloader = dataloader(args, dataset)
     train, val, test = dataloader.get_pytorch_dataloaders()

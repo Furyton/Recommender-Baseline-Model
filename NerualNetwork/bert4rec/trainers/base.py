@@ -13,8 +13,6 @@ from tqdm import tqdm
 from abc import *
 from pathlib import Path
 
-PATH = "/data/lizongbu-slurm/wushiguang/2021/ml/bert/bert4rec/experiments/test_2021-01-19_10/models/best_acc_model.pth"
-#PATH = None
 
 class AbstractTrainer(metaclass=ABCMeta):
     def __init__(self, args, model, train_loader, val_loader, test_loader, export_root):

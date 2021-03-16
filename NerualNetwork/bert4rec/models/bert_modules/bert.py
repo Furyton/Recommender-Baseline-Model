@@ -34,42 +34,14 @@ class BERT(nn.Module):
 
         self.unidirectional_tf_blocks = None
 
-    def forward(self, x, test):
-        if self.is_original == 1:
-            # x's dimension: batch_size x max_len
-            mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)
-            # batch_size x 1 x max_len x max_len
-            x = self.embedding(x)
-            for transformer in self.transformer_blocks:
-                x = transformer.forward(x, mask)
-            return x
-        else:
-            # x's dimension: batch_size x max_len
-            mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)
-            # batch_size x 1 x max_len x max_len
-
-            mask_backward = torch.tril(torch.ones(self.max_len, self.max_len), diagonal=-1)
-
-            mask_backward = mask_backward.unsqueeze(0).repeat(x.size(0), 1, 1).unsqueeze(1)
-
-            mask_backward = mask_backward * mask
-
-            # embedding the indexed sequence to sequence of vectors
-            x = self.embedding(x)
-            y = x.clone()
-
-            # print("embedding size: ", x.size())
-
-            # running over multiple transformer blocks
-            for transformer in self.transformer_blocks:
-                x = transformer.forward(x, mask)
-
-            if not test:
-                for transformer in self.transformer_blocks:
-                    y = transformer.forward(y, mask_backward)
-
-            # print("output size of bert: ", x.size())
-            return (x, y) if not test else x# dimension: Batch_size x max_item_size x hidden_size
+    def forward(self, x):
+        # x's dimension: batch_size x max_len
+        mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)
+        # batch_size x 1 x max_len x max_len
+        x = self.embedding(x)
+        for transformer in self.transformer_blocks:
+            x = transformer.forward(x, mask)
+        return x
 
     def init_weights(self):
         pass

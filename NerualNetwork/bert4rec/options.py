@@ -1,7 +1,7 @@
-from templates import set_template
 from dataloaders import DATALOADERS
 from models import MODELS
 from trainers import TRAINERS
+import json
 
 import argparse
 
@@ -11,8 +11,9 @@ parser = argparse.ArgumentParser(description='RecPlay')
 ################
 # Top Level
 ################
-parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'])
-parser.add_argument('--template', type=str, default=None)
+parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'resume'])
+parser.add_argument('--load_processed_dataset', type=bool, default=False)
+parser.add_argument('--processed_dataset_path', type=str, default=None)
 ################
 # Test
 ################
@@ -90,9 +91,13 @@ parser.add_argument('--bert_hidden_dropout', type=float, default=None)
 ################
 parser.add_argument('--experiment_dir', type=str, default='experiments')
 parser.add_argument('--experiment_description', type=str, default='test')
-parser.add_argument('--data_dir', type=str, default=None)
+parser.add_argument('--dataset_name', type=str, default=None)
 
-parser.add_argument('--path', type=str, default=None)
+parser.add_argument('--resume_path', type=str, default=None)
 ################
 args = parser.parse_args()
-# set_template(args)
+
+with open("config.json", 'r') as f:
+    t_args = argparse.Namespace()
+    t_args.__dict__.update(json.load(f))
+    args.parser.parse_args(namespace=t_args)
