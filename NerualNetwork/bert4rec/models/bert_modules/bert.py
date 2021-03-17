@@ -11,7 +11,6 @@ class BERT(nn.Module):
 
         fix_random_seed_as(args.model_init_seed)
         # self.init_weights()
-        self.is_original = args.original
         max_len = args.bert_max_len
         self.max_len = max_len
         num_items = args.bert_num_items

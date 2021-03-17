@@ -19,6 +19,8 @@ parser.add_argument('--processed_dataset_path', type=str, default=None)
 ################
 parser.add_argument('--test_model_path', type=str, default=None)
 
+parser.add_argument('--resume_path', type=str, default=None)
+
 ################
 # Dataset
 ################
@@ -93,7 +95,6 @@ parser.add_argument('--experiment_dir', type=str, default='experiments')
 parser.add_argument('--experiment_description', type=str, default='test')
 parser.add_argument('--dataset_name', type=str, default=None)
 
-parser.add_argument('--resume_path', type=str, default=None)
 ################
 args = parser.parse_args()
 

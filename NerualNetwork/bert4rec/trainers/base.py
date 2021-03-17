@@ -21,11 +21,12 @@ class AbstractTrainer(metaclass=ABCMeta):
         self.model = model.to(self.device)
         self.optimizer = self._create_optimizer()
 
-        if args.path is not None:
-            print('Loading model state dict')
-            self.checkpoint = torch.load(args.path)
+        if args.resume_path is not None:
+            print("resuming model and optimizer\'s parameters")
+            self.checkpoint = torch.load(args.resume_path)
+            print("checkpoint epoch number: ", self.checkpoint['epoch'])
             self.model.load_state_dict(self.checkpoint['model_state_dict'])
-            self.optimizer.load_state_dict(self.checkpoint['optimizer_state_dict'])
+            self.optimizer.load_state_dict((self.checkpoint['optimizer_state_dict']))
 
         self.is_parallel = args.num_gpu > 1
         if self.is_parallel:
@@ -85,7 +86,7 @@ class AbstractTrainer(metaclass=ABCMeta):
         self.lr_scheduler.step()
 
         average_meter_set = AverageMeterSet()
-        #tqdm_dataloader = tqdm(self.train_loader)
+        # tqdm_dataloader = tqdm(self.train_loader)
 
         for batch_idx, batch in enumerate(self.train_loader):
             batch_size = batch[0].size(0)
@@ -98,12 +99,12 @@ class AbstractTrainer(metaclass=ABCMeta):
             self.optimizer.step()
 
             average_meter_set.update('loss', loss.item())
-            #tqdm_dataloader.set_description('Epoch {}, loss {:.3f} '.format(epoch+1, average_meter_set['loss'].avg))
+            # tqdm_dataloader.set_description('Epoch {}, loss {:.3f} '.format(epoch+1, average_meter_set['loss'].avg))
 
             accum_iter += batch_size
 
             if self._needs_to_log(accum_iter):
-                #tqdm_dataloader.set_description('Logging to Tensorboard')
+                # tqdm_dataloader.set_description('Logging to Tensorboard')
                 log_data = {
                     'state_dict': (self._create_state_dict()),
                     'epoch': epoch,
@@ -113,7 +114,6 @@ class AbstractTrainer(metaclass=ABCMeta):
                 self.log_extra_train_info(log_data)
                 self.logger_service.log_train(log_data)
 
-
         return accum_iter
 
     def validate(self, epoch, accum_iter):
@@ -122,7 +122,7 @@ class AbstractTrainer(metaclass=ABCMeta):
         average_meter_set = AverageMeterSet()
 
         with torch.no_grad():
-            #tqdm_dataloader = tqdm(self.val_loader)
+            # tqdm_dataloader = tqdm(self.val_loader)
             for batch_idx, batch in enumerate(self.val_loader):
                 batch = [x.to(self.device) for x in batch]
 
@@ -151,12 +151,12 @@ class AbstractTrainer(metaclass=ABCMeta):
     def test(self):
         print('Test best model with test set!')
 
-        if PATH is not None:
-            best_model = torch.load(PATH).get('model_state_dict')
-        else:
-            best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get(
-                'model_state_dict')
-        self.model.load_state_dict(best_model)
+        # if PATH is not None:
+        #     best_model = torch.load(PATH).get('model_state_dict')
+        # else:
+        #     best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get(
+        #         'model_state_dict')
+        # self.model.load_state_dict(best_model)
         self.model.eval()
 
         average_meter_set = AverageMeterSet()
@@ -181,15 +181,15 @@ class AbstractTrainer(metaclass=ABCMeta):
             average_metrics = average_meter_set.averages()
             print(average_metrics)
             with open(os.path.join(self.export_root, 'logs', 'test_metrics.json'), 'w') as f:
-                json.dump(average_metrics, f, indent=4)
-
+                json.dump(json.dumps(average_metrics), f, indent=4)
 
     def _create_optimizer(self):
         args = self.args
         if args.optimizer.lower() == 'adam':
             return optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         elif args.optimizer.lower() == 'sgd':
-            return optim.SGD(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
+            return optim.SGD(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay,
+                             momentum=args.momentum)
         else:
             raise ValueError
 

@@ -76,12 +76,14 @@ def set_up_gpu(args):
     args.num_gpu = len(args.device_idx.split(","))
 
 
-def load_pretrained_weights(model, path):
-    chk_dict = torch.load(os.path.abspath(path))
+# for test
+def load_pretrained_weights(model, path, device):
+    chk_dict = torch.load(os.path.abspath(path), map_location=torch.device(device))
     model_state_dict = chk_dict[STATE_DICT_KEY] if STATE_DICT_KEY in chk_dict else chk_dict['state_dict']
     model.load_state_dict(model_state_dict)
 
 
+# for resume training
 def setup_to_resume(args, model, optimizer):
     chk_dict = torch.load(os.path.join(os.path.abspath(args.resume_training), 'models/checkpoint-recent.pth'))
     model.load_state_dict(chk_dict[STATE_DICT_KEY])
