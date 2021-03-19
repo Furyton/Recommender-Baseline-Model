@@ -73,7 +73,8 @@ parser.add_argument('--log_period_as_iter', type=int, default=12800)
 # evaluation #
 parser.add_argument('--metric_ks', nargs='+', type=int, default=[10, 20, 50], help='ks for Metric@k')
 parser.add_argument('--best_metric', type=str, default='NDCG@10', help='Metric for determining the best model')
-
+# processing #
+parser.add_argument('--show_process_bar', type=bool, default=False, help='show the processing bar or not')
 ################
 # Model
 ################
@@ -101,4 +102,4 @@ args = parser.parse_args()
 with open("config.json", 'r') as f:
     t_args = argparse.Namespace()
     t_args.__dict__.update(json.load(f))
-    args.parser.parse_args(namespace=t_args)
+    args = parser.parse_args(namespace=t_args)

@@ -16,14 +16,16 @@ class BERTTrainer(AbstractTrainer):
         return 'bert'
 
     def add_extra_loggers(self):
-        pass
+        dataiter = iter(self.train_loader)
+        seqs, labels = dataiter.next()
+        self.writer.add_graph(self.model, seqs)
 
     def log_extra_train_info(self, log_data):
         pass
 
     def calculate_loss(self, batch):
         seqs, labels = batch
-        logits = self.model(seqs, False)  # B x T x V
+        logits = self.model(seqs)  # B x T x V
 
         logits = logits.view(-1, logits.size(-1))  # (B*T) x V
 
@@ -34,7 +36,7 @@ class BERTTrainer(AbstractTrainer):
 
     def calculate_metrics(self, batch):
         seqs, candidates, labels = batch
-        scores= self.model(seqs, True)  # B x T x V
+        scores = self.model(seqs)  # B x T x V
         scores = scores[:, -1, :]  # B x V
         scores = scores.gather(1, candidates)  # B x C
 

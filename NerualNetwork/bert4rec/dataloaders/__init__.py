@@ -2,9 +2,10 @@ from collections import defaultdict
 
 from .bert import BertDataloader
 
-import pickle
-
+import _pickle as cPickle
+import os
 from os import path
+
 
 DATALOADERS = {
     BertDataloader.code(): BertDataloader,
@@ -19,7 +20,12 @@ def data_partition(fname, max_len, prop_sliding_window):
     user_valid = []
     user_test = []
     # assume user/item index starting from 1
-    f = open('../Data/' + fname, 'r')
+
+    current_directory = path.dirname(__file__)
+    parent_directory = path.split(current_directory)[0]
+    dataset_filepath = path.join(parent_directory, 'Data', fname)
+
+    f = open(dataset_filepath, 'r')
     for line in f:
         u, i = line.rstrip().split(' ')
         u = int(u)
@@ -29,7 +35,7 @@ def data_partition(fname, max_len, prop_sliding_window):
         User[u].append(i)
 
     data = []
-
+    # sliding window
     sliding_step = int(prop_sliding_window * max_len) if prop_sliding_window != -1.0 else max_len
 
     for user in User:
@@ -60,10 +66,21 @@ def data_partition(fname, max_len, prop_sliding_window):
 
 def dataloader_factory(args):
     if args.load_processed_dataset:
-        dataset = pickle.load(open(args.processed_dataset_path, 'rb'))
+        dataset = cPickle.load(open(args.processed_dataset_path, 'rb'))
     else:
         dataset = data_partition(args.data_name, args.bert_max_len, args.prop_sliding_window)
-        pickle.dump(dataset, open("../Data/Processed/" + args.data_name + "_processed.p", "wb"))
+
+        current_directory = path.dirname(__file__)
+        parent_directory = path.split(current_directory)[0]
+
+        processed_dir = path.join(parent_directory, 'Data', 'Processed')
+
+        if not path.exists(processed_dir):
+            os.makedirs(processed_dir)
+
+        dataset_filepath = path.join(processed_dir, args.data_name + '_processed.p')
+
+        cPickle.dump(dataset, open(dataset_filepath, 'wb'))
     dataloader = DATALOADERS[args.dataloader_code]
     dataloader = dataloader(args, dataset)
     train, val, test = dataloader.get_pytorch_dataloaders()

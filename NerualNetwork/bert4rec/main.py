@@ -14,6 +14,9 @@ def train():
 
     trainer = trainer_factory(args, model, train_loader, val_loader, test_loader, export_root)
 
+    trainer.train()
+    trainer.test()
+
 
 """    
     #trainer.train()
@@ -31,6 +34,9 @@ def test():
     load_pretrained_weights(model, args.test_model_path, args.device)
 
     trainer = trainer_factory(args, model, train_loader, val_loader, test_loader, export_root)
+
+    trainer.test()
+
 
 if __name__ == '__main__':
     if args.mode == 'train':

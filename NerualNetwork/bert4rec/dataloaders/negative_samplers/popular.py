@@ -6,6 +6,7 @@ from collections import Counter
 
 import numpy as np
 
+
 class PopularNegativeSampler(AbstractNegativeSampler):
     @classmethod
     def code(cls):

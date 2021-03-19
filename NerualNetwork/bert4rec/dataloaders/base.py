@@ -5,6 +5,7 @@ import random
 
 # [user_train, user_valid, user_test, usernum, itemnum]
 
+
 class AbstractDataloader(metaclass=ABCMeta):
     def __init__(self, args, dataset):
         self.args = args

@@ -1,5 +1,7 @@
 {
+  "model_code": "bert",
   "mode": "train",
+  "model_init_seed": 0,
 
   "load_processed_dataset" : false,
   "processed_dataset_path": null,
@@ -18,11 +20,15 @@
   "test_negative_sample_size" : 100,
   "test_negative_sampling_seed" : 98765,
 
+  "train_negative_sampler_code" : "popular",
+  "train_negative_sample_size" : 0,
+  "train_negative_sampling_seed" : 98765,
+
   "trainer_code" : "bert",
 
   "device" :"cpu",
   "num_gpu" : 1,
-  "device_idx" : 0,
+  "device_idx" : "0",
 
   "optimizer" : "Adam",
   "lr" : 0.0001,
@@ -31,7 +37,7 @@
   "decay_step": 25,
   "gamma": 1.0,
 
-  "num_epochs": 100,
+  "num_epochs": 2,
 
   "metric_ks" : [1, 5, 10, 20],
   "best_metric": "NDCG@10",
@@ -47,5 +53,7 @@
   "experiment_dir": "experiments",
   "experiment_description": "test",
   "data_name": "ml.txt",
-  "resume_path": null
+  "resume_path": null,
+
+  "show_process_bar" : false
 }

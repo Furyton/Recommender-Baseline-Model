@@ -23,7 +23,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
         if args.resume_path is not None:
             print("resuming model and optimizer\'s parameters")
-            self.checkpoint = torch.load(args.resume_path)
+            self.checkpoint = torch.load(args.resume_path, map_location=torch.device(args.device))
             print("checkpoint epoch number: ", self.checkpoint['epoch'])
             self.model.load_state_dict(self.checkpoint['model_state_dict'])
             self.optimizer.load_state_dict((self.checkpoint['optimizer_state_dict']))
@@ -45,6 +45,7 @@ class AbstractTrainer(metaclass=ABCMeta):
         self.export_root = export_root
         self.writer, self.train_loggers, self.val_loggers = self._create_loggers()
         self.add_extra_loggers()
+
         self.logger_service = LoggerService(self.train_loggers, self.val_loggers)
         self.log_period_as_iter = args.log_period_as_iter
 
@@ -76,19 +77,27 @@ class AbstractTrainer(metaclass=ABCMeta):
             print("epoch: ", epoch)
             accum_iter = self.train_one_epoch(epoch, accum_iter)
             self.validate(epoch, accum_iter)
+
+            self.lr_scheduler.step()
+
         self.logger_service.complete({
             'state_dict': (self._create_state_dict()),
         })
         self.writer.close()
 
+    def get_lr(self):
+        for param_group in self.optimizer.param_groups:
+            return param_group['lr']
+
     def train_one_epoch(self, epoch, accum_iter):
         self.model.train()
-        self.lr_scheduler.step()
 
         average_meter_set = AverageMeterSet()
         # tqdm_dataloader = tqdm(self.train_loader)
 
-        for batch_idx, batch in enumerate(self.train_loader):
+        iterator = self.train_loader if not self.args.show_process_bar else tqdm(self.train_loader)
+
+        for batch_idx, batch in enumerate(iterator):
             batch_size = batch[0].size(0)
             batch = [x.to(self.device) for x in batch]
 
@@ -99,12 +108,18 @@ class AbstractTrainer(metaclass=ABCMeta):
             self.optimizer.step()
 
             average_meter_set.update('loss', loss.item())
-            # tqdm_dataloader.set_description('Epoch {}, loss {:.3f} '.format(epoch+1, average_meter_set['loss'].avg))
+
+            if self.args.show_process_bar:
+                iterator.set_description('Epoch {}, loss {:.3f} '.format(epoch + 1, average_meter_set['loss'].avg))
 
             accum_iter += batch_size
 
+            self.writer.add_scalar("learning_rate", self.get_lr(), accum_iter)
+
             if self._needs_to_log(accum_iter):
-                # tqdm_dataloader.set_description('Logging to Tensorboard')
+                if self.args.show_process_bar:
+                    iterator.set_description('Logging to Tensorboard')
+
                 log_data = {
                     'state_dict': (self._create_state_dict()),
                     'epoch': epoch,
@@ -122,21 +137,24 @@ class AbstractTrainer(metaclass=ABCMeta):
         average_meter_set = AverageMeterSet()
 
         with torch.no_grad():
-            # tqdm_dataloader = tqdm(self.val_loader)
-            for batch_idx, batch in enumerate(self.val_loader):
+            iterator = self.val_loader if not self.args.show_process_bar else tqdm(self.val_loader)
+
+            for batch_idx, batch in enumerate(iterator):
                 batch = [x.to(self.device) for x in batch]
 
                 metrics = self.calculate_metrics(batch)
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
-                """description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
-                                      ['Recall@%d' % k for k in self.metric_ks[:3]] + \
-                                      ['MRR@%d' % k for k in self.metric_ks[:3]]
-                description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
-                description = description.replace('NDCG', 'N').replace('Recall', 'R').replace('MRR', 'M')
-                description = description.format(*(average_meter_set[k].avg for k in description_metrics))
-                tqdm_dataloader.set_description(description)"""
+
+                if self.args.show_process_bar:
+                    description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
+                                          ['Recall@%d' % k for k in self.metric_ks[:3]] + \
+                                          ['MRR@%d' % k for k in self.metric_ks[:3]]
+                    description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
+                    description = description.replace('NDCG', 'N').replace('Recall', 'R').replace('MRR', 'M')
+                    description = description.format(*(average_meter_set[k].avg for k in description_metrics))
+                    iterator.set_description(description)
 
             log_data = {
                 'state_dict': (self._create_state_dict()),
@@ -151,37 +169,43 @@ class AbstractTrainer(metaclass=ABCMeta):
     def test(self):
         print('Test best model with test set!')
 
-        # if PATH is not None:
-        #     best_model = torch.load(PATH).get('model_state_dict')
-        # else:
-        #     best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get(
-        #         'model_state_dict')
-        # self.model.load_state_dict(best_model)
+        if self.args.test_model_path is not None:
+            best_model = torch.load(self.args.test_model_path, map_location=torch.device(self.args.device)).get(
+                'model_state_dict')
+        else:
+            best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get(
+                'model_state_dict')
+
+        self.model.load_state_dict(best_model)
+
         self.model.eval()
 
         average_meter_set = AverageMeterSet()
 
         with torch.no_grad():
-            tqdm_dataloader = tqdm(self.test_loader)
-            for batch_idx, batch in enumerate(tqdm_dataloader):
+            iterator = self.test_loader if not self.args.show_process_bar else tqdm(self.test_loader)
+
+            for batch_idx, batch in enumerate(iterator):
                 batch = [x.to(self.device) for x in batch]
 
                 metrics = self.calculate_metrics(batch)
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
-                description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
-                                      ['Recall@%d' % k for k in self.metric_ks[:3]] + \
-                                      ['MRR@%d' % k for k in self.metric_ks[:3]]
-                description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
-                description = description.replace('NDCG', 'N').replace('Recall', 'R').replace('MRR', 'M')
-                description = description.format(*(average_meter_set[k].avg for k in description_metrics))
-                tqdm_dataloader.set_description(description)
+
+                if self.args.show_process_bar:
+                    description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
+                                          ['Recall@%d' % k for k in self.metric_ks[:3]] + \
+                                          ['MRR@%d' % k for k in self.metric_ks[:3]]
+                    description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
+                    description = description.replace('NDCG', 'N').replace('Recall', 'R').replace('MRR', 'M')
+                    description = description.format(*(average_meter_set[k].avg for k in description_metrics))
+                    iterator.set_description(description)
 
             average_metrics = average_meter_set.averages()
             print(average_metrics)
             with open(os.path.join(self.export_root, 'logs', 'test_metrics.json'), 'w') as f:
-                json.dump(json.dumps(average_metrics), f, indent=4)
+                json.dump(average_metrics, f)
 
     def _create_optimizer(self):
         args = self.args
@@ -195,7 +219,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
     def _create_loggers(self):
         root = Path(self.export_root)
-        writer = SummaryWriter(root.joinpath('logs'))
+        writer = SummaryWriter(root.joinpath('logs', 'tensorboard_visualization'))
         model_checkpoint = root.joinpath('models')
 
         train_loggers = [

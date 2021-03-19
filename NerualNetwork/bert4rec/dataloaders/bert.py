@@ -4,6 +4,7 @@ import torch
 import torch.utils.data as data_utils
 import copy
 
+
 class BertDataloader(AbstractDataloader):
     def __init__(self, args, dataset):
         super().__init__(args, dataset)
@@ -28,7 +29,8 @@ class BertDataloader(AbstractDataloader):
         return dataloader
 
     def _get_train_dataset(self):
-        dataset = BertTrainDataset(self.train, self.max_len, self.mask_prob, self.CLOZE_MASK_TOKEN, self.item_count, self.rng)
+        dataset = BertTrainDataset(self.train, self.max_len, self.mask_prob, self.CLOZE_MASK_TOKEN, self.item_count,
+                                   self.rng)
         return dataset
 
     def _get_val_loader(self):
@@ -47,14 +49,15 @@ class BertDataloader(AbstractDataloader):
     def _get_eval_dataset(self, mode):
         answers = self.val if mode == 'val' else self.test
         # train_dataset = None
-        if mode =='val':
+        if mode == 'val':
             train_dataset = copy.deepcopy(self.train)
         else:
             train_dataset = copy.deepcopy(self.train)
             for index, seq in enumerate(train_dataset):
                 seq.append(self.val[index][0])
 
-        dataset = BertEvalDataset(train_dataset, answers, self.max_len, self.CLOZE_MASK_TOKEN, self.test_negative_samples)
+        dataset = BertEvalDataset(train_dataset, answers, self.max_len, self.CLOZE_MASK_TOKEN,
+                                  self.test_negative_samples)
         return dataset
 
 
@@ -93,6 +96,7 @@ class BertTrainDataset(data_utils.Dataset):
             else:
                 tokens.append(s)
                 labels.append(0)
+                # padding is 0
 
         tokens = tokens[-self.max_len:]
         labels = labels[-self.max_len:]
@@ -136,4 +140,3 @@ class BertEvalDataset(data_utils.Dataset):
         seq = [0] * padding_len + seq
 
         return torch.LongTensor(seq), torch.LongTensor(candidates), torch.LongTensor(labels)
-
