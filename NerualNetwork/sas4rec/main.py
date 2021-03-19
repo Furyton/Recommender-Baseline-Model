@@ -7,10 +7,12 @@ from model import SASRec
 from tqdm import tqdm
 from utils import *
 
+
 def str2bool(s):
     if s not in {'false', 'true'}:
         raise ValueError('Not a valid boolean string')
     return s == 'true'
+
 
 PATH = None
 if __name__ == '__main__':
@@ -29,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', default='cuda', type=str)
     parser.add_argument('--inference_only', default=False, type=str2bool)
     parser.add_argument('--state_dict_path', default=None, type=str)
-    os.environ['CUDA_VISIBLE_DEVICES']='0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     args = parser.parse_args()
     if not os.path.isdir(args.dataset + '_' + args.train_dir):
@@ -50,7 +52,7 @@ if __name__ == '__main__':
 
     sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
     model = SASRec(usernum, itemnum, args).to(args.device)  # no ReLU activation in original SASRec implementation?
-    
+
     PATH = "/data/lizongbu-slurm/wushiguang/2021/ml/sas4rec/ml_default/SASRec.epoch=500.lr=0.00078.layer=2.head=2.hidden=64.maxlen=200.pth"
     model.load_state_dict(torch.load(PATH))
 
@@ -65,8 +67,7 @@ if __name__ == '__main__':
         '(HR@1: %.4f, MRR@1: %.4f)'
         % (t_valid[0], t_valid[1], t_test[0], t_test[1], t_test[2], t_test[3], t_test[4], t_test[5],
            t_test[6], t_test[7], t_test[8], t_test[9], t_test[10]))
-   
-    
+
     """for name, param in model.named_parameters():
         try:
             torch.nn.init.xavier_uniform_(param.data)
@@ -75,7 +76,6 @@ if __name__ == '__main__':
 
     # this fails embedding init 'Embedding' object has no attribute 'dim'
     # model.apply(torch.nn.init.xavier_uniform_)
-
 
     model.train()  # enable model training
 
@@ -96,8 +96,8 @@ if __name__ == '__main__':
     if args.inference_only:
         model.eval()
         t_test = evaluate(model, dataset, args)
-        print('test (NDCG@10: %.4f, HR@10: %.4f, NDCG@5: %.4f, HR@5 %.4f, HR@1 %.4f)' % (t_test[0], t_test[1], t_test[2], t_test[3], t_test[4]))
-
+        print('test (NDCG@10: %.4f, HR@10: %.4f, NDCG@5: %.4f, HR@5 %.4f, HR@1 %.4f)' % (
+        t_test[0], t_test[1], t_test[2], t_test[3], t_test[4]))
 
     # ce_criterion = torch.nn.CrossEntropyLoss()
     # https://github.com/NVIDIA/pix2pixHD/issues/9 how could an old bug appear again...
@@ -106,10 +106,10 @@ if __name__ == '__main__':
 
     T = 0.0
     t0 = time.time()
-    
+
     for epoch in range(epoch_start_idx, args.num_epochs + 1):
         if args.inference_only: break  # just to decrease identition
-        #tqdm_loader=tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b')
+        # tqdm_loader=tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b')
         for step in range(num_batch):
             u, seq, pos, neg = sampler.next_batch()  # tuples to ndarray
             u, seq, pos, neg = np.array(u), np.array(seq), np.array(pos), np.array(neg)
@@ -124,8 +124,8 @@ if __name__ == '__main__':
             for param in model.item_emb.parameters(): loss += args.l2_emb * torch.norm(param)
             loss.backward()
             adam_optimizer.step()
-            #print("loss in epoch {} iteration {}: {}".format(epoch, step,loss.item()))  # expected 0.4~0.6 after init few epochs
-            #tqdm_loader.set_description('Epoch{}, loss{:.4f} '.format(epoch, loss.item()))
+            # print("loss in epoch {} iteration {}: {}".format(epoch, step,loss.item()))  # expected 0.4~0.6 after init few epochs
+            # tqdm_loader.set_description('Epoch{}, loss{:.4f} '.format(epoch, loss.item()))
 
         if epoch % 20 == 0:
             model.eval()
@@ -135,12 +135,12 @@ if __name__ == '__main__':
             t_test = evaluate(model, dataset, args)
             t_valid = evaluate_valid(model, dataset, args)
             print(
-        'valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@20: %.4f, HR@20: %.4f, MRR@20: %.4f), '
-        '(NDCG@10: %.4f, HR@10: %.4f, MRR@10: %.4f), '
-        '(NDCG@5: %.4f, HR@5: %.4f, MRR@5: %.4f), '
-        '(HR@1: %.4f, MRR@1: %.4f)'
-        % (t_valid[0], t_valid[1], t_test[0], t_test[1], t_test[2], t_test[3], t_test[4], t_test[5],
-           t_test[6], t_test[7], t_test[8], t_test[9], t_test[10]))
+                'valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@20: %.4f, HR@20: %.4f, MRR@20: %.4f), '
+                '(NDCG@10: %.4f, HR@10: %.4f, MRR@10: %.4f), '
+                '(NDCG@5: %.4f, HR@5: %.4f, MRR@5: %.4f), '
+                '(HR@1: %.4f, MRR@1: %.4f)'
+                % (t_valid[0], t_valid[1], t_test[0], t_test[1], t_test[2], t_test[3], t_test[4], t_test[5],
+                   t_test[6], t_test[7], t_test[8], t_test[9], t_test[10]))
             f.write(str(t_valid) + ' ' + str(t_test) + '\n')
             f.flush()
             t0 = time.time()
@@ -152,7 +152,7 @@ if __name__ == '__main__':
             fname = fname.format(args.num_epochs, args.lr, args.num_blocks, args.num_heads, args.hidden_units,
                                  args.maxlen)
             torch.save(model.state_dict(), os.path.join(folder, fname))
-    
+
     model.eval()
     print('Evaluating', end='')
     t_test = evaluate(model, dataset, args)

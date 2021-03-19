@@ -82,20 +82,27 @@ parser.add_argument('--model_code', type=str, default='bert', choices=MODELS.key
 parser.add_argument('--model_init_seed', type=int, default=None)
 # BERT #
 parser.add_argument('--bert_max_len', type=int, default=None, help='Length of sequence for bert')
-parser.add_argument('--bert_num_items', type=int, default=None, help='Number of total items')
 parser.add_argument('--bert_hidden_units', type=int, default=None, help='Size of hidden vectors (d_model)')
 parser.add_argument('--bert_num_blocks', type=int, default=None, help='Number of transformer layers')
 parser.add_argument('--bert_num_heads', type=int, default=None, help='Number of heads for multi-attention')
 parser.add_argument('--bert_dropout', type=float, default=None, help='Dropout probability to use throughout the model')
 parser.add_argument('--bert_mask_prob', type=float, default=None, help='Probability for masking items in the training sequence')
 parser.add_argument('--bert_hidden_dropout', type=float, default=None)
+
+# SAS #
+parser.add_argument('--sas_max_len', type=int, default=200, help='Length of sequence for sas')
+parser.add_argument('--sas_hidden_units', type=int, default=64, help='Size of hidden vectors')
+parser.add_argument('--sas_num_blocks', type=int, default=2, help='Number of transformer layers')
+parser.add_argument('--sas_heads', type=int, default=2, help='Number of heads for multi-attention')
+parser.add_argument('--sas_dropout', type=float, default=0.2, help='Dropout probability to use throughout the model')
+parser.add_argument('--l2_emb', type=float, default=0.0)
 ################
 # Experiment
 ################
 parser.add_argument('--experiment_dir', type=str, default='experiments')
 parser.add_argument('--experiment_description', type=str, default='test')
 parser.add_argument('--dataset_name', type=str, default=None)
-
+parser.add_argument('--num_items', type=int, default=None, help='Number of total items')
 ################
 args = parser.parse_args()
 

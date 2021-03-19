@@ -6,6 +6,7 @@ import numpy as np
 from collections import defaultdict, Counter
 from multiprocessing import Process, Queue
 
+
 # sampler for batch generation
 def random_neq(l, r, s):
     t = np.random.randint(l, r)
@@ -33,7 +34,8 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             if nxt != 0: neg[idx] = random_neq(1, itemnum + 1, ts)
             nxt = i
             idx -= 1
-            if idx == -1: break
+            if idx == -1:
+                break
 
         return user, seq, pos, neg
 
@@ -110,8 +112,6 @@ def data_partition(fname):
         user_test.append([data[i][-1]])
 
     return [user_train, user_valid, user_test, usernum, itemnum]
-
-
 
 
 # TODO: merge evaluate functions for test and val set

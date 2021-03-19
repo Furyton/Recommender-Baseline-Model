@@ -17,7 +17,7 @@ class AbstractDataloader(metaclass=ABCMeta):
         self.test = dataset[2]
         self.user_count = dataset[3]
         self.item_count = dataset[4]
-        args.bert_num_items = self.item_count
+        args.num_items = self.item_count
 
         code = args.train_negative_sampler_code
         train_negative_sampler = negative_sampler_factory(code, self.train, self.val, self.test,
