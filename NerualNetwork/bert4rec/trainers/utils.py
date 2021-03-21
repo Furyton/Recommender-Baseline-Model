@@ -24,7 +24,8 @@ def ndcg(scores, labels, k):
     return ndcg.mean()
 
 
-def recalls_and_ndcgs_for_ks(scores, labels, ks):
+# B x C, B x C
+def recalls_ndcgs_and_mrr_for_ks(scores, labels, ks):
     metrics = {}
 
     scores = scores.cpu()

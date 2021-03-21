@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from .bert import BertDataloader
+from .sas import SASDataLoader
 
 import _pickle as cPickle
 import os
@@ -9,6 +10,7 @@ from os import path
 
 DATALOADERS = {
     BertDataloader.code(): BertDataloader,
+    SASDataLoader.code(): SASDataLoader
 }
 
 

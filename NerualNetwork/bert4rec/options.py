@@ -38,6 +38,7 @@ parser.add_argument('--train_batch_size', type=int, default=64)
 parser.add_argument('--val_batch_size', type=int, default=64)
 parser.add_argument('--test_batch_size', type=int, default=64)
 parser.add_argument('--prop_sliding_window', type=float, default=0.1)
+parser.add_argument('--worker_number', type=int, default=1)
 ################
 # NegativeSampler
 ################

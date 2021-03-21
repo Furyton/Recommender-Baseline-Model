@@ -2,6 +2,7 @@ from torch import nn as nn
 import torch
 import numpy as np
 
+
 class PointWiseFeedForward(torch.nn.Module):
     def __init__(self, hidden_units, dropout_rate):
         super(PointWiseFeedForward, self).__init__()
@@ -18,19 +19,22 @@ class PointWiseFeedForward(torch.nn.Module):
         outputs += inputs
         return outputs
 
+
 class SAS(nn.Module):
     def __init__(self, args):
         super().__init__()
 
         self.item_num = args.num_items
+        self.device = args.device
 
         self.item_emb = torch.nn.Embedding(self.item_num + 1, args.sas_hidden_units, padding_idx=0)
         self.pos_emb = torch.nn.Embedding(args.sas_max_len, args.sas_hidden_units)  # TO IMPROVE
-        self.emb_dropout = torch.nn.Dropout(p=args.sas_dropout_rate)
+        self.emb_dropout = torch.nn.Dropout(p=args.sas_dropout)
 
         self.attention_layernorms = torch.nn.ModuleList()  # to be Q for self-attention
         self.attention_layers = torch.nn.ModuleList()
         self.forward_layernorms = torch.nn.ModuleList()
+        self.forward_layers = torch.nn.ModuleList()
 
         self.last_layernorm = torch.nn.LayerNorm(args.sas_hidden_units, eps=1e-8)
 
@@ -39,14 +43,14 @@ class SAS(nn.Module):
             self.attention_layernorms.append(new_attn_layernorm)
 
             new_attn_layer = torch.nn.MultiheadAttention(args.sas_hidden_units,
-                                                         args.sas_num_heads,
-                                                         args.sas_dropout_rate)
+                                                         args.sas_heads,
+                                                         args.sas_dropout)
             self.attention_layers.append(new_attn_layer)
 
             new_fwd_layernorm = torch.nn.LayerNorm(args.sas_hidden_units, eps=1e-8)
             self.forward_layernorms.append(new_fwd_layernorm)
 
-            new_fwd_layer = PointWiseFeedForward(args.sas_hidden_units, args.sas_dropout_rate)
+            new_fwd_layer = PointWiseFeedForward(args.sas_hidden_units, args.sas_dropout)
             self.forward_layers.append(new_fwd_layer)
 
     def log2feats(self, log_seqs):
@@ -60,7 +64,7 @@ class SAS(nn.Module):
         seqs *= ~timeline_mask.unsqueeze(-1)  # broadcast in last dim
 
         tl = seqs.shape[1]  # time dim len for enforce causality
-        attention_mask = ~torch.tril(torch.ones((tl, tl), dtype=torch.bool, device=self.dev))
+        attention_mask = ~torch.tril(torch.ones((tl, tl), dtype=torch.bool, device=self.device))
 
         for i in range(len(self.attention_layers)):
             seqs = torch.transpose(seqs, 0, 1)
@@ -80,11 +84,11 @@ class SAS(nn.Module):
 
         return log_feats
 
-    def forward(self, user_ids, log_seqs, pos_seqs, neg_seqs):  # for training
+    def forward(self, log_seqs, pos_seqs, neg_seqs):  # for training
         log_feats = self.log2feats(log_seqs)  # user_ids hasn't been used yet
 
-        pos_embs = self.item_emb(torch.LongTensor(pos_seqs).to(self.dev))
-        neg_embs = self.item_emb(torch.LongTensor(neg_seqs).to(self.dev))
+        pos_embs = self.item_emb(torch.LongTensor(pos_seqs).to(self.device))
+        neg_embs = self.item_emb(torch.LongTensor(neg_seqs).to(self.device))
 
         pos_logits = (log_feats * pos_embs).sum(dim=-1)
         neg_logits = (log_feats * neg_embs).sum(dim=-1)
@@ -94,7 +98,7 @@ class SAS(nn.Module):
 
         return pos_logits, neg_logits  # pos_pred, neg_pred
 
-    def predict(self, user_ids, log_seqs, item_indices):  # for inference
+    def predict(self, log_seqs, item_indices):  # for inference
         log_feats = self.log2feats(log_seqs)  # user_ids hasn't been used yet
 
         final_feat = log_feats[:, -1, :]  # only use last QKV classifier, a waste

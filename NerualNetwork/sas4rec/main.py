@@ -1,3 +1,4 @@
+import json
 import os
 import time
 import torch
@@ -8,13 +9,6 @@ from tqdm import tqdm
 from utils import *
 
 
-def str2bool(s):
-    if s not in {'false', 'true'}:
-        raise ValueError('Not a valid boolean string')
-    return s == 'true'
-
-
-PATH = None
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ml', type=str)
@@ -24,16 +18,23 @@ if __name__ == '__main__':
     parser.add_argument('--maxlen', default=200, type=int)
     parser.add_argument('--hidden_units', default=64, type=int)
     parser.add_argument('--num_blocks', default=2, type=int)
-    parser.add_argument('--num_epochs', default=500, type=int)
+    parser.add_argument('--num_epochs', default=2, type=int)
     parser.add_argument('--num_heads', default=2, type=int)
     parser.add_argument('--dropout_rate', default=0.2, type=float)
     parser.add_argument('--l2_emb', default=0.0, type=float)
-    parser.add_argument('--device', default='cuda', type=str)
-    parser.add_argument('--inference_only', default=False, type=str2bool)
+    parser.add_argument('--device', default='cpu', type=str)
+    parser.add_argument('--inference_only', default=False, type=bool)
     parser.add_argument('--state_dict_path', default=None, type=str)
+
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     args = parser.parse_args()
+
+    with open("config.json", 'r') as f:
+        t_args = argparse.Namespace()
+        t_args.__dict__.update(json.load(f))
+        args.parser.parse_args(namespace=t_args)
+
     if not os.path.isdir(args.dataset + '_' + args.train_dir):
         os.makedirs(args.dataset + '_' + args.train_dir)
     with open(os.path.join(args.dataset + '_' + args.train_dir, 'args.txt'), 'w') as f:
@@ -52,9 +53,6 @@ if __name__ == '__main__':
 
     sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
     model = SASRec(usernum, itemnum, args).to(args.device)  # no ReLU activation in original SASRec implementation?
-
-    PATH = "/data/lizongbu-slurm/wushiguang/2021/ml/sas4rec/ml_default/SASRec.epoch=500.lr=0.00078.layer=2.head=2.hidden=64.maxlen=200.pth"
-    model.load_state_dict(torch.load(PATH))
 
     model.eval()
     print('Evaluating', end='')

@@ -1,9 +1,8 @@
-import torch
-
 from .base import AbstractTrainer
-from .utils import recalls_and_ndcgs_for_ks
+from .utils import recalls_ndcgs_and_mrr_for_ks
 
 import torch.nn as nn
+import torch
 
 
 class BERTTrainer(AbstractTrainer):
@@ -16,9 +15,11 @@ class BERTTrainer(AbstractTrainer):
         return 'bert'
 
     def add_extra_loggers(self):
-        dataiter = iter(self.train_loader)
-        seqs, labels = dataiter.next()
-        self.writer.add_graph(self.model, seqs)
+        with torch.no_grad():
+            dataiter = iter(self.train_loader)
+            seqs, labels = dataiter.next()
+
+            self.writer.add_graph(self.model, seqs)
 
     def log_extra_train_info(self, log_data):
         pass
@@ -40,5 +41,5 @@ class BERTTrainer(AbstractTrainer):
         scores = scores[:, -1, :]  # B x V
         scores = scores.gather(1, candidates)  # B x C
 
-        metrics = recalls_and_ndcgs_for_ks(scores, labels, self.metric_ks)
+        metrics = recalls_ndcgs_and_mrr_for_ks(scores, labels, self.metric_ks)
         return metrics

@@ -2,7 +2,7 @@ from .base import AbstractDataloader
 
 import torch
 import torch.utils.data as data_utils
-import copy
+from copy import deepcopy
 
 
 class BertDataloader(AbstractDataloader):
@@ -25,7 +25,7 @@ class BertDataloader(AbstractDataloader):
     def _get_train_loader(self):
         dataset = self._get_train_dataset()
         dataloader = data_utils.DataLoader(dataset, batch_size=self.args.train_batch_size,
-                                           shuffle=True, pin_memory=True)
+                                           shuffle=True, pin_memory=True, num_workers=self.worker_num)
         return dataloader
 
     def _get_train_dataset(self):
@@ -43,16 +43,16 @@ class BertDataloader(AbstractDataloader):
         batch_size = self.args.val_batch_size if mode == 'val' else self.args.test_batch_size
         dataset = self._get_eval_dataset(mode)
         dataloader = data_utils.DataLoader(dataset, batch_size=batch_size,
-                                           shuffle=False, pin_memory=True)
+                                           shuffle=False, pin_memory=True, num_workers=self.worker_num)
         return dataloader
 
     def _get_eval_dataset(self, mode):
         answers = self.val if mode == 'val' else self.test
         # train_dataset = None
         if mode == 'val':
-            train_dataset = copy.deepcopy(self.train)
+            train_dataset = deepcopy(self.train)
         else:
-            train_dataset = copy.deepcopy(self.train)
+            train_dataset = deepcopy(self.train)
             for index, seq in enumerate(train_dataset):
                 seq.append(self.val[index][0])
 
@@ -110,7 +110,7 @@ class BertTrainDataset(data_utils.Dataset):
         return torch.LongTensor(tokens), torch.LongTensor(labels)
 
     def _getseq(self, user):
-        return self.u2seq[user]
+        return deepcopy(self.u2seq[user])
 
 
 class BertEvalDataset(data_utils.Dataset):
@@ -127,9 +127,9 @@ class BertEvalDataset(data_utils.Dataset):
 
     def __getitem__(self, index):
         user = self.users[index]
-        seq = self.u2seq[user]
-        answer = self.u2answer[user]
-        negs = self.negative_samples[user]
+        seq = deepcopy(self.u2seq[user])
+        answer = deepcopy(self.u2answer[user])
+        negs = deepcopy(self.negative_samples[user])
 
         candidates = answer + negs
         labels = [1] * len(answer) + [0] * len(negs)

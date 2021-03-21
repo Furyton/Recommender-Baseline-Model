@@ -1,5 +1,5 @@
 {
-  "model_code": "bert",
+  "model_code": "sas",
   "mode": "train",
   "model_init_seed": 0,
 
@@ -8,7 +8,9 @@
 
   "test_model_path" : null,
 
-  "dataloader_code" : "bert",
+  "dataloader_code" : "sas",
+
+  "worker_number" : 5,
 
   "train_batch_size" : 64,
   "val_batch_size" : 64,
@@ -24,7 +26,7 @@
   "train_negative_sample_size" : 0,
   "train_negative_sampling_seed" : 98765,
 
-  "trainer_code" : "bert",
+  "trainer_code" : "sas",
 
   "device" :"cpu",
   "num_gpu" : 1,
@@ -49,6 +51,13 @@
   "bert_dropout": 0.25,
   "bert_mask_prob": 0.3,
   "bert_hidden_dropout": 0.25,
+
+  "sas_max_len": 200,
+  "sas_hidden_units": 64,
+  "sas_num_blocks": 2,
+  "sas_heads": 2,
+  "sas_dropout": 0.2,
+  "l2_emb": 0.0,
 
   "experiment_dir": "experiments",
   "experiment_description": "test",

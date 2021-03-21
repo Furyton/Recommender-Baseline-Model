@@ -1,8 +1,9 @@
 from .bert import BERTTrainer
-
+from .sas import SASTrainer
 
 TRAINERS = {
     BERTTrainer.code(): BERTTrainer,
+    SASTrainer.code(): SASTrainer
 }
 
 

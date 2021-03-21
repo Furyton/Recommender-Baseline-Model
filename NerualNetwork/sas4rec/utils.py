@@ -158,7 +158,8 @@ def evaluate(model, dataset, args):
         for i in reversed(train[u]):
             seq[idx] = i
             idx -= 1
-            if idx == -1: break
+            if idx == -1:
+                break
         rated = set(train[u])
         rated.add(0)
         item_idx = [test[u][0]]
