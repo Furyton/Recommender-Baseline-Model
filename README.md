@@ -31,10 +31,21 @@ note: I combine these two models into the same framework('bert4rec&sas4rec'), wh
 
 #### dataset format
 
-the dataset are stored in the `Data` directory in text format
+the dataset are stored in the `Data` directory in text format, e.g. `ml.txt`
 
+the index of users and items starts at 1, and the id should be continuous.
+each line indicates a interaction: user_id item_id
+for any single user, the order of the items interacted with should be preserved. But the order between different user could be mixed.
+```
+1 2
+1 5
+1 1
+2 1
+2 2
+1 7
+```
 
-
+#### configuration
 the config file `config.json` is 
 
 
