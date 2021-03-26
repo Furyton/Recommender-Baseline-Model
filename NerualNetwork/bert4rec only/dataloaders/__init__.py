@@ -66,7 +66,7 @@ def data_partition(fname, max_len, prop_sliding_window):
 
 def dataloader_factory(args):
     if args.load_processed_dataset:
-        dataset = cPickle.load(open(args.processed_dataset_path, 'rb'))
+        dataset = cPickle.load(open(path.normpath(args.processed_dataset_path), 'rb'))
     else:
         dataset = data_partition(args.data_name, args.bert_max_len, args.prop_sliding_window)
 

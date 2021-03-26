@@ -23,7 +23,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
         if args.resume_path is not None:
             print("resuming model and optimizer\'s parameters")
-            self.checkpoint = torch.load(args.resume_path, map_location=torch.device(args.device))
+            self.checkpoint = torch.load(Path(args.resume_path), map_location=torch.device(args.device))
             print("checkpoint epoch number: ", self.checkpoint['epoch'])
             self.model.load_state_dict(self.checkpoint['model_state_dict'])
             self.optimizer.load_state_dict((self.checkpoint['optimizer_state_dict']))
@@ -170,7 +170,7 @@ class AbstractTrainer(metaclass=ABCMeta):
         print('Test best model with test set!')
 
         if self.args.test_model_path is not None:
-            best_model = torch.load(self.args.test_model_path, map_location=torch.device(self.args.device)).get(
+            best_model = torch.load(Path(self.args.test_model_path), map_location=torch.device(self.args.device)).get(
                 'model_state_dict')
         else:
             best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get(
