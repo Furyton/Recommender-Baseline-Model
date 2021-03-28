@@ -111,6 +111,7 @@ def evaluate(ranks: list):
 
 
 def train(train_data, item_num, user_num, data_len, answer_list, candidates_list, epoch_num, lr, dim, device_num,
+          candidate_num,
           model_dir=None, device='cpu'):
     print("== training ==")
     train_data = [[x - 1 for x in l] for l in train_data]
@@ -125,7 +126,7 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
     if model_dir is not None:
         model = torch.load(model_dir)
 
-    model = model.cuda()
+    model = model.to(device=device)
 
     model.eval()
 
@@ -135,11 +136,11 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
 
     for user_id in tqdm(range(user_num)):
         items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(dtype=torch.int64, device=device)
-        user = torch.tensor([user_id] * 101).to(dtype=torch.int64, device=device)
+        user = torch.tensor([user_id] * (candidate_num + 1)).to(dtype=torch.int64, device=device)
 
         with torch.no_grad():
             scores = model(user, items, items)
-            scores = {items[i].item(): scores[0][i].item() for i in range(101)}
+            scores = {items[i].item(): scores[0][i].item() for i in range((candidate_num + 1))}
             # scores = {item_id: w[user_id][item_id] for item_id in answer_list[user_id] + candidates_list[user_id]}
             scores = [key for key, value in sorted(scores.items(), key=lambda item: -item[1])]
             rankings.append(scores.index(answer_list[user_id][0]))
@@ -173,12 +174,13 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
             rankings = []
 
             for user_id in tqdm(range(user_num)):
-                items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(dtype=torch.int64, device=device)
-                user = torch.tensor([user_id] * 101).to(dtype=torch.int64, device=device)
+                items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(dtype=torch.int64,
+                                                                                         device=device)
+                user = torch.tensor([user_id] * (candidate_num + 1)).to(dtype=torch.int64, device=device)
 
                 with torch.no_grad():
                     scores = model(user, items, items)
-                    scores = {items[i].item(): scores[0][i].item() for i in range(101)}
+                    scores = {items[i].item(): scores[0][i].item() for i in range((candidate_num + 1))}
                     # scores = {item_id: w[user_id][item_id] for item_id in answer_list[user_id] + candidates_list[user_id]}
                     scores = [key for key, value in sorted(scores.items(), key=lambda item: -item[1])]
                     rankings.append(scores.index(answer_list[user_id][0]))

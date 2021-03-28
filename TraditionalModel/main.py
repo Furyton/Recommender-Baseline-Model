@@ -1,5 +1,7 @@
 import ast
 # import BPRFM
+import os
+
 import BPR_pyTorch
 import numpy as np
 from tqdm import tqdm
@@ -152,7 +154,7 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser()
     parse.add_argument('--model_type', required=True, type=str, choices=['bpr', 'knn', 'pop'],
                        help='model\'s type, bpr, knn, pop')
-    parse.add_argument('--train_dir', default=PATH, type=str, help="training dataset directory, e.g. "
+    parse.add_argument('--dataset_path', default=None, type=str, help="training dataset path, e.g. "
                                                                    "'data/pop_test.txt' ")
     parse.add_argument('--k', default=100, type=int, help="itemKNN model k, default: 100")
     parse.add_argument('--epoch', default=500, type=int, help='bpr epoch, default: 500')
@@ -167,7 +169,7 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
 
-    data = get_data(path=args.train_dir)
+    data = get_data(path=os.path.normpath(args.train_dir))
 
     user_num = len(data)
 
@@ -191,7 +193,7 @@ if __name__ == '__main__':
     if args.model_type == 'bpr':
         BPR_pyTorch.train(observed, max_item_id, user_num, get_data_len(observed), predict, candidates,
                           epoch_num=args.epoch, lr=args.lr, dim=args.hidden_units, device_num=args.device_num,
-                          model_dir=args.model_dir, device=args.device)
+                          model_dir=args.model_dir, device=args.device, candidate_num=args.candidate_num)
     elif args.model_type == 'knn':
         predict_rank = itemKNN.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
                                     user_num=user_num, item_num=max_item_id, k_neighbors=args.k, occur=popularity)
