@@ -19,7 +19,7 @@ note: I combine these two models into the same framework('bert4rec&sas4rec'), wh
 ### bert4rec and sas4rec
 using the same training framework
 
-[Click here to check out the usage for bert4rec and sas4rec](bert4rec%20only/README.md)
+[Click here to check out the usage for bert4rec and sas4rec](bert4rec&sas4rec/README.md)
 
 
 ### sas4rec
