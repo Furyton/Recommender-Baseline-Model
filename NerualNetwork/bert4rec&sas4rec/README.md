@@ -212,6 +212,6 @@ TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
 
 open `http://localhost:6006/` in the browser
 
-![](./tensorboard_display.png)
+![tensorboard display](tensorboard_display.PNG)
 
-![](./tensorboard_graph_display.png)
+![tensorboard graph display](tensorboard_graph_display.PNG)
