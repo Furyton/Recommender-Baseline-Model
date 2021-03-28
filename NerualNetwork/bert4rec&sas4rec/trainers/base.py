@@ -27,7 +27,7 @@ class AbstractTrainer(metaclass=ABCMeta):
             self.checkpoint = torch.load(Path(args.resume_path), map_location=torch.device(args.device))
             print("checkpoint epoch number: ", self.checkpoint['epoch'])
             self.model.load_state_dict(self.checkpoint['model_state_dict'])
-            self.optimizer.load_state_dict((self.checkpoint['optimizer_state_dict']))
+            # self.optimizer.load_state_dict((self.checkpoint['optimizer_state_dict']))
 
         self.is_parallel = args.num_gpu > 1
         if self.is_parallel:

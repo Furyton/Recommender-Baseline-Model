@@ -87,6 +87,7 @@ def select_candidates(data_dict, sorted_items_dict: dict, candidate_num=100):
 
     return candidates
 
+
 #
 # def select_candidates(data_dict, sorted_items_dict: dict, candidate_num=100):
 #     print("== selecting candidates ==")
@@ -149,16 +150,19 @@ def get_data_len(dataset):
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser()
-    parse.add_argument('--model_type',  required=True, type=str, choices=['bpr', 'knn', 'pop'], help='model\'s type, bpr, knn, pop')
+    parse.add_argument('--model_type', required=True, type=str, choices=['bpr', 'knn', 'pop'],
+                       help='model\'s type, bpr, knn, pop')
     parse.add_argument('--train_dir', default=PATH, type=str, help="training dataset directory, e.g. "
                                                                    "'data/pop_test.txt' ")
     parse.add_argument('--k', default=100, type=int, help="itemKNN model k, default: 100")
     parse.add_argument('--epoch', default=500, type=int, help='bpr epoch, default: 500')
+    parse.add_argument('--device', default='cpu', type=str, help="training device for BPR, cuda or cpu, default cuda")
     parse.add_argument('--device_num', default=0, type=int, help='cuda device id, default: 0')
     parse.add_argument('--lr', default=1e-3, type=float, help='bpr learning rate, default: 1e-3')
     parse.add_argument('--candidate_num', default=100, type=int, help='candidate number for evaluating, default: 100')
     parse.add_argument('--hidden_units', default=64, type=int, help='bpr hidden unit number, default: 64')
-    parse.add_argument('--candidate_dir', default=None, type=str, help='directory candidates list are saved, e.g. "candidate.p", default: None')
+    parse.add_argument('--candidate_dir', default=None, type=str,
+                       help='directory candidates list are saved, e.g. "candidate.p", default: None')
     parse.add_argument('--model_dir', default=None, type=str, help='directory bpr model is saved, default: None')
 
     args = parse.parse_args()
@@ -185,7 +189,9 @@ if __name__ == '__main__':
         pickle.dump(candidates, open('candidates.p', 'wb'))
 
     if args.model_type == 'bpr':
-        BPR_pyTorch.train(observed, max_item_id, user_num, get_data_len(observed), predict, candidates, epoch_num=args.epoch, lr=args.lr, dim=args.hidden_units, device_num=args.device_num, model_dir=args.model_dir)
+        BPR_pyTorch.train(observed, max_item_id, user_num, get_data_len(observed), predict, candidates,
+                          epoch_num=args.epoch, lr=args.lr, dim=args.hidden_units, device_num=args.device_num,
+                          model_dir=args.model_dir, device=args.device)
     elif args.model_type == 'knn':
         predict_rank = itemKNN.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
                                     user_num=user_num, item_num=max_item_id, k_neighbors=args.k, occur=popularity)
@@ -196,13 +202,13 @@ if __name__ == '__main__':
         print('HIT: ', HIT)
         print('MRR: ', MRR)
     elif args.model_type == 'pop':
-        predict_rank = POP.test(popularity=popularity, observed_list=observed, answer_list=predict, candidates_list=candidates)
+        predict_rank = POP.test(popularity=popularity, observed_list=observed, answer_list=predict,
+                                candidates_list=candidates)
         NDCG, HIT, MRR = evaluate(predict_rank)
 
         print('NDCG: ', NDCG)
         print('HIT: ', HIT)
         print('MRR: ', MRR)
-
 
     # BPR without pyTorch
     # BPRFM.test(observed_list=observed, answer_list=predict, candidates_list=candidates,

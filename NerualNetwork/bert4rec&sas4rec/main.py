@@ -1,9 +1,12 @@
-from options import args
+import argparse
+
+from options import args, parser
 from models import model_factory
 from dataloaders import dataloader_factory
 from trainers import trainer_factory
 from utils import *
 import json
+from os import path
 
 
 def train():
@@ -39,6 +42,11 @@ def test():
 
 
 if __name__ == '__main__':
+    with open(path.normpath(args.config_file), 'r') as f:
+        t_args = argparse.Namespace()
+        t_args.__dict__.update(json.load(f))
+        args = parser.parse_args(namespace=t_args)
+
     if args.mode == 'train':
         train()
     elif args.mode == 'test':

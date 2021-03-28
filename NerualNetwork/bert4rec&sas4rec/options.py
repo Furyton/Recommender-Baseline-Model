@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description='RecPlay')
 ################
 # Top Level
 ################
+parser.add_argument('--config_file', type=str, default='config.json')
 parser.add_argument('--mode', type=str, default='train', choices=['train', 'test', 'resume'])
 parser.add_argument('--load_processed_dataset', type=bool, default=False)
 parser.add_argument('--processed_dataset_path', type=str, default=None)
@@ -32,7 +33,6 @@ parser.add_argument('--split', type=str, default='leave_one_out', help='How to s
 ################
 # Dataloader
 ################
-parser.add_argument('--dataloader_code', type=str, default='bert', choices=DATALOADERS.keys())
 parser.add_argument('--dataloader_random_seed', type=float, default=0.0)
 parser.add_argument('--train_batch_size', type=int, default=64)
 parser.add_argument('--val_batch_size', type=int, default=64)
@@ -54,7 +54,6 @@ parser.add_argument('--test_negative_sampling_seed', type=int, default=None)
 ################
 # Trainer
 ################
-parser.add_argument('--trainer_code', type=str, default='bert', choices=TRAINERS.keys())
 # device #
 parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'cuda'])
 parser.add_argument('--num_gpu', type=int, default=1)
@@ -107,7 +106,3 @@ parser.add_argument('--num_items', type=int, default=None, help='Number of total
 ################
 args = parser.parse_args()
 
-with open("config.json", 'r') as f:
-    t_args = argparse.Namespace()
-    t_args.__dict__.update(json.load(f))
-    args = parser.parse_args(namespace=t_args)

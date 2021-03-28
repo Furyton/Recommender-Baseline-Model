@@ -1,20 +1,20 @@
-# usage
+# 使用方法
 
-[中文](./README_CN.md)
+[English](./README.md)
 
-## bert4rec & sas4rec
+## sas4rec
 
-### dataset format
+### 数据集格式
 
-the datasets are stored in the `Data` directory in text format, e.g. `ml.txt`
+数据集放在了`Data` 目录下，文本格式，比如 `ml.txt`
 
-the index of users and items starts at 1, and the id should be both continuous.
+user和item下标从 1 开始，必须连续
 
-each line indicates an interaction: user_id item_id
+每行代表一个交互：user_id item_id
 
-for any single user, the order of the interacted items should be preserved. But the order between different users could be mixed.
+对于同一个用户，物品出现顺序不能打乱，但不同用户的数据出现位置可以混在一起
 
-example
+sample
 ```
 1 2
 1 5
@@ -24,8 +24,9 @@ example
 1 7
 ```
 
-### configuration
-the config file `config.json` is all you need to change
+### 配置
+需要更改配置文件 `config.json`
+
 
 dataset part
 
@@ -121,33 +122,31 @@ experiment_description: default: "test"
 dataset_name: the dataset filename you put in the `Data` dir, e.g. "ml.txt"
 ```
 
-this is the config you can edit for `bert4rec&sas4rec`.
 
-### training
+### 训练
 
 #### Step 1
-
-put your dataset into the `Data` dir, make sure the format meet the requirement.
+将数据集放到 `Data` 目录下，确保格式正确
 
 #### Step 2
-edit the `config.json` file
+编辑 `config.json` 文件
 
 #### Step 3
+安装库
 
-install Essential Package.
 ```
 pip install -r requirements.txt
 ```
 
 #### Step 4
-
 run
 ```
 python main.py
 ```
 
 ### note
-you can also config the parameters in the command line. they will overwrite the `config.json`
+
+可以使用命令行参数，它会覆盖 `config.json` 
 
 example
 
@@ -155,7 +154,8 @@ example
 python main.py --mode=test
 ```
 
-you can select the config file in the command line
+命令行参数中可以选择配置文件
+
 
 example
 
@@ -165,13 +165,13 @@ python main.py --config_file=config1.json
 python main.py --config_file=config2.json
 ```
 
-don't forget to change `test_model_path` and `resume_path` in the `config.json` when used
+别忘记更改 `test_mdoel_path` 或者 `resume_path` 如果需要使用 mode=test 或者 resume training
 
-### explanation
+### 解释
 
-after you finishing the training, you can check your directory, by default it is `experiment` 
+训练结束后，在对应目录下可以找到模型参数和结果，默认放在 `experiment` 目录下，可以通过 `config.json` 中的 `experiment_dir` 中更改
 
-it looks like this
+目录结构如下
 ```
 - test_bert_2021-03-28_0
     - logs
@@ -187,30 +187,15 @@ it looks like this
 
 ```
 
-the weight state dict is saved at `models` dir, used for test or resume training
+models 里保存模型权重信息，用来test 或者 resume training
 
-to see the metrics changes during the training, first open cmd in the `logs` dir (Windows)
-
-```
-C:\...\logs>
-```
-
-then type the command
+可视化或者用图表展示模型训练过程，首先在 `logs` 目录下打开 cmd （windows 下）
 
 ```
 tensorboard --logdir=tensorboard_visualization
 ```
 
-then it may return
-
-```
-logs>tensorboard --logdir=tensorboard_visualization
-TensorFlow installation not found - running with reduced feature set.
-Serving TensorBoard on localhost; to expose to the network, use a proxy or pass --bind_all
-TensorBoard 2.4.1 at http://localhost:6006/ (Press CTRL+C to quit)
-```
-
-open `http://localhost:6006/` in the browser
+打开浏览器进入`http://localhost:6006/`
 
 ![](./tensorboard_display.png)
 

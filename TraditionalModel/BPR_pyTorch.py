@@ -8,6 +8,8 @@ import os
 
 # epochs = 500
 lamb = 0.025  # 正则化系数
+
+
 # lr = 1e-3
 # dim = 32
 
@@ -74,7 +76,7 @@ class BPR(nn.Module):
         prediction_j = (user * item_j).sum(dim=-1)
 
         return prediction_i, prediction_j, lamb * (
-                    (user * user).sum(dim=-1) + (item_i * item_i).sum(dim=-1) + (item_j * item_j).sum(dim=-1))
+                (user * user).sum(dim=-1) + (item_i * item_i).sum(dim=-1) + (item_j * item_j).sum(dim=-1))
 
 
 def evaluate(ranks: list):
@@ -108,7 +110,8 @@ def evaluate(ranks: list):
     return NDCG, HIT, MRR
 
 
-def train(train_data, item_num, user_num, data_len, answer_list, candidates_list, epoch_num, lr, dim, device_num, model_dir=None):
+def train(train_data, item_num, user_num, data_len, answer_list, candidates_list, epoch_num, lr, dim, device_num,
+          model_dir=None, device='cpu'):
     print("== training ==")
     train_data = [[x - 1 for x in l] for l in train_data]
     answer_list = [[x - 1 for x in l] for l in answer_list]
@@ -120,7 +123,7 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
     model = BPR(user_num, item_num, dim)
 
     if model_dir is not None:
-       model = torch.load(model_dir)
+        model = torch.load(model_dir)
 
     model = model.cuda()
 
@@ -131,8 +134,8 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
     last_HIT = 0
 
     for user_id in tqdm(range(user_num)):
-        items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(torch.int64).cuda()
-        user = torch.tensor([user_id] * 101).to(torch.int64).cuda()
+        items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(dtype=torch.int64, device=device)
+        user = torch.tensor([user_id] * 101).to(dtype=torch.int64, device=device)
 
         with torch.no_grad():
             scores = model(user, items, items)
@@ -170,8 +173,8 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
             rankings = []
 
             for user_id in tqdm(range(user_num)):
-                items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(torch.int64).cuda()
-                user = torch.tensor([user_id] * 101).to(torch.int64).cuda()
+                items = torch.tensor(answer_list[user_id] + candidates_list[user_id]).to(dtype=torch.int64, device=device)
+                user = torch.tensor([user_id] * 101).to(dtype=torch.int64, device=device)
 
                 with torch.no_grad():
                     scores = model(user, items, items)

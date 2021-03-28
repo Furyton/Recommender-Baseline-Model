@@ -7,7 +7,6 @@ both models are implemented in pytorch
 
 
 ```
-- bert4rec only
 - sas4rec only
 - bert4rec&sas4rec
 ```
@@ -21,11 +20,6 @@ note: I combine these two models into the same framework('bert4rec&sas4rec'), wh
 using the same training framework
 
 [Click here to check out the usage for bert4rec and sas4rec](bert4rec%20only/README.md)
-
-### bert4rec
-modified from the original [Jaywonchung](https://github.com/jaywonchung/BERT4Rec-VAE-Pytorch)
-
-[Click here to check out the usage for bert4rec](bert4rec%20only/README.md)
 
 
 ### sas4rec

@@ -1,5 +1,5 @@
 {
-  "model_code": "sas",
+  "model_code": "bert",
   "mode": "train",
   "model_init_seed": 0,
 
@@ -7,8 +7,6 @@
   "processed_dataset_path": null,
 
   "test_model_path" : null,
-
-  "dataloader_code" : "sas",
 
   "worker_number" : 5,
 
@@ -26,20 +24,17 @@
   "train_negative_sample_size" : 0,
   "train_negative_sampling_seed" : 98765,
 
-  "trainer_code" : "sas",
-
   "device" :"cpu",
   "num_gpu" : 1,
   "device_idx" : "0",
 
   "optimizer" : "Adam",
-  "lr" : 0.0001,
+  "lr" : 0.0007,
   "weight_decay" : 0,
   "momentum" : null,
-  "decay_step": 25,
-  "gamma": 1.0,
-
-  "num_epochs": 2,
+  "decay_step": 50,
+  "gamma": 1,
+  "num_epochs": 500,
 
   "metric_ks" : [1, 5, 10, 20],
   "best_metric": "NDCG@10",

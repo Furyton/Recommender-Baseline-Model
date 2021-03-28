@@ -24,7 +24,7 @@ def setup_train(args):
 
 
 def create_experiment_export_folder(args):
-    experiment_dir, experiment_description = args.experiment_dir, args.experiment_description
+    experiment_dir, experiment_description = args.experiment_dir, args.experiment_description + "_" + args.model_code
     if not os.path.exists(experiment_dir):
         os.mkdir(experiment_dir)
     experiment_path = get_name_of_experiment_path(experiment_dir, experiment_description)

@@ -11,6 +11,7 @@ from utils import *
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--config_file', default='config.json', type=str)
     parser.add_argument('--dataset', default='ml', type=str)
     parser.add_argument('--train_dir', default='default', type=str)
     parser.add_argument('--batch_size', default=128, type=int)
@@ -30,10 +31,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    with open("config.json", 'r') as f:
+    with open(os.path.normpath(args.config_file), 'r') as f:
         t_args = argparse.Namespace()
         t_args.__dict__.update(json.load(f))
-        args.parser.parse_args(namespace=t_args)
+        args = parser.parse_args(namespace=t_args)
 
     if not os.path.isdir(args.dataset + '_' + args.train_dir):
         os.makedirs(args.dataset + '_' + args.train_dir)

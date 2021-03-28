@@ -83,7 +83,7 @@ def dataloader_factory(args):
         dataset_filepath = path.join(processed_dir, args.data_name + '_processed.p')
 
         cPickle.dump(dataset, open(dataset_filepath, 'wb'))
-    dataloader = DATALOADERS[args.dataloader_code]
+    dataloader = DATALOADERS[args.model_code]
     dataloader = dataloader(args, dataset)
     train, val, test = dataloader.get_pytorch_dataloaders()
     return train, val, test
