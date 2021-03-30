@@ -169,7 +169,8 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
 
-    data = get_data(path=os.path.normpath(args.train_dir))
+    data = get_data(path=os.path.normpath(args.dataset_path))
+
 
     user_num = len(data)
 

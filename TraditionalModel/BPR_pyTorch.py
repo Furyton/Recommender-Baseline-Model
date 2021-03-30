@@ -159,12 +159,12 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
         model.train()
         train_loader.dataset.negative_sample()
         for user, item_i, item_j in tqdm(train_loader):
-            user = user.cuda()
-            item_i = item_i.cuda()
-            item_j = item_j.cuda()
+            user = user.to(device=device)
+            item_i = item_i.to(device=device)
+            item_j = item_j.to(device=device)
             model.zero_grad()
             prediction_i, prediction_j, reg = model(user, item_i, item_j)
-            loss = -(prediction_i - prediction_j).sigmoid().log().sum() + reg
+            loss = -(prediction_i - prediction_j).sigmoid().log().sum() + reg.sum()
             loss.backward()
             optimizer.step()
 
