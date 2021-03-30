@@ -4,7 +4,7 @@ common used Recommend System Baseline Model, including the traditional statistic
 ## info
 
 ### Neural Network
-[click here to check out the information and usage](NerualNetwork/README.md)
+[click here to check out the information and usage](NerualNetwork/)
 
 ### Statistical Model
-[click here to check out the information and usage](TraditionalModel/README.md)
+[click here to check out the information and usage](TraditionalModel/)

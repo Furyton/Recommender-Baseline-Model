@@ -197,6 +197,6 @@ tensorboard --logdir=tensorboard_visualization
 
 打开浏览器进入`http://localhost:6006/`
 
-![](./tensorboard_display.png)
+![tensorboard display](tensorboard_display.PNG)
 
-![](./tensorboard_graph_display.png)
+![tensorboard graph display](tensorboard_graph_display.PNG)
