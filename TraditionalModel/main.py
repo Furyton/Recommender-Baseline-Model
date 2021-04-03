@@ -192,9 +192,13 @@ if __name__ == '__main__':
         pickle.dump(candidates, open('candidates.p', 'wb'))
 
     if args.model_type == 'bpr':
-        BPR_pyTorch.train(observed, max_item_id, user_num, get_data_len(observed), predict, candidates,
+        NDCG, HIT, MRR = BPR_pyTorch.train(observed, max_item_id, user_num, get_data_len(observed), predict, candidates,
                           epoch_num=args.epoch, lr=args.lr, dim=args.hidden_units, device_num=args.device_num,
                           model_dir=args.model_dir, device=args.device, candidate_num=args.candidate_num)
+
+        print('NDCG: ', NDCG)
+        print('HIT: ', HIT)
+        print('MRR: ', MRR)
     elif args.model_type == 'knn':
         predict_rank = itemKNN.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
                                     user_num=user_num, item_num=max_item_id, k_neighbors=args.k, occur=popularity)
