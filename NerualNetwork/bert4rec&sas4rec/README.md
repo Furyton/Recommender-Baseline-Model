@@ -2,6 +2,9 @@
 
 [中文](./README_CN.md)
 
+## warning
+remember to comment [this line](https://github.com/Furyton/Recommender-Baseline-Model/blob/4d8831e547e3eefee36cd8ebcfb22834c31871d8/NerualNetwork/bert4rec%26sas4rec/utils.py#L75) if you are using slurm schedular
+
 ## bert4rec & sas4rec
 
 ### dataset format
