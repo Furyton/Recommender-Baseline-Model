@@ -2,6 +2,9 @@
 
 [English](./README.md)
 
+## 注意
+如果你使用slurm 来调度你的gpu资源，要注释掉[这一行](https://github.com/Furyton/Recommender-Baseline-Model/blob/4d8831e547e3eefee36cd8ebcfb22834c31871d8/NerualNetwork/bert4rec%26sas4rec/utils.py#L75)
+
 ## sas4rec
 
 ### 数据集格式

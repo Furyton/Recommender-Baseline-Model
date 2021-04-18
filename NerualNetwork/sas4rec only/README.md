@@ -1,6 +1,9 @@
 # usage
 
 [中文](./README_CN.md)
+## warning
+
+remember to comment [this line](https://github.com/Furyton/Recommender-Baseline-Model/blob/7232e7f2033e28c1c4ce75bf7087bd066924edc1/NerualNetwork/sas4rec%20only/main.py#L30) if you are using slurm.
 
 ## sas4rec
 
