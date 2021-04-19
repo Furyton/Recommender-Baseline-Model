@@ -30,7 +30,7 @@ class SASTrainer(AbstractTrainer):
         pos_logits, neg_logits = self.model(seq, pos, neg)
         pos_labels, neg_labels = torch.ones(pos_logits.shape, device=self.args.device), torch.zeros(neg_logits.shape, device=self.args.device)
 
-        indices = np.where(pos != 0)
+        indices = torch.where(pos.cpu() != 0)
 
         loss = self.bce_criterion(pos_logits[indices], pos_labels[indices])
         loss += self.bce_criterion(neg_logits[indices], neg_labels[indices])

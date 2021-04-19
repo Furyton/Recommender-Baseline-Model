@@ -54,13 +54,13 @@ class SAS(nn.Module):
             self.forward_layers.append(new_fwd_layer)
 
     def log2feats(self, log_seqs):
-        seqs = self.item_emb(torch.LongTensor(log_seqs))
+        seqs = self.item_emb(log_seqs)
         seqs *= self.item_emb.embedding_dim ** 0.5
         positions = np.tile(np.array(range(log_seqs.shape[1])), [log_seqs.shape[0], 1])
-        seqs += self.pos_emb(torch.LongTensor(positions))
+        seqs += self.pos_emb(torch.LongTensor(positions).to(self.device))
         seqs = self.emb_dropout(seqs)
 
-        timeline_mask = torch.BoolTensor(log_seqs == 0)
+        timeline_mask = (log_seqs == 0)
         seqs *= ~timeline_mask.unsqueeze(-1)  # broadcast in last dim
 
         tl = seqs.shape[1]  # time dim len for enforce causality
@@ -87,8 +87,8 @@ class SAS(nn.Module):
     def forward(self, log_seqs, pos_seqs, neg_seqs):  # for training
         log_feats = self.log2feats(log_seqs)  # user_ids hasn't been used yet
 
-        pos_embs = self.item_emb(torch.LongTensor(pos_seqs).to(self.device))
-        neg_embs = self.item_emb(torch.LongTensor(neg_seqs).to(self.device))
+        pos_embs = self.item_emb(pos_seqs)
+        neg_embs = self.item_emb(neg_seqs)
 
         pos_logits = (log_feats * pos_embs).sum(dim=-1)
         neg_logits = (log_feats * neg_embs).sum(dim=-1)
@@ -103,7 +103,7 @@ class SAS(nn.Module):
 
         final_feat = log_feats[:, -1, :]  # only use last QKV classifier, a waste
 
-        item_embs = self.item_emb(torch.LongTensor(item_indices))  # (U, I, C)
+        item_embs = self.item_emb(item_indices)  # (U, I, C)
 
         logits = item_embs.matmul(final_feat.unsqueeze(-1)).squeeze(-1)
 
