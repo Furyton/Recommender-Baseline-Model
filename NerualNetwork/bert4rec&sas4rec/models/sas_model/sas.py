@@ -104,25 +104,12 @@ class SAS(nn.Module):
 
         return pos_logits, neg_logits  # pos_pred, neg_pred
 
-    def pred(self, log_seqs, item_indices):
-        log_feats = self.log2feats(log_seqs)
-
-        item_embs = self.item_emb(item_indices)
-
-        # logits = (item_embs * log_feats).sum(dim=-1)
-
-        logits = item_embs.matmul(log_feats.transpose(1, 2)).sum(dim=-1)
-
-        # pred = self.pos_sigmoid(logits)
-
-        return logits
-
     def predict(self, log_seqs, item_indices):  # for inference
         log_feats = self.log2feats(log_seqs)  # user_ids hasn't been used yet
 
         final_feat = log_feats[:, -1, :]  # only use last QKV classifier, a waste
 
-        item_embs = self.item_emb(torch.LongTensor(item_indices).to(self.dev))  # (U, I, C)
+        item_embs = self.item_emb(torch.LongTensor(item_indices).to(self.device))  # (U, I, C)
 
         logits = item_embs.matmul(final_feat.unsqueeze(-1)).squeeze(-1)
 

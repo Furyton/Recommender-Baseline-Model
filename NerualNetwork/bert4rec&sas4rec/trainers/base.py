@@ -126,8 +126,6 @@ class AbstractTrainer(metaclass=ABCMeta):
 
             if self.args.show_process_bar:
                 iterator.set_description('Epoch {}, loss {:.3f} '.format(epoch + 1, average_meter_set['loss'].avg))
-            else:
-                print("loss : ", tot_loss / tot_batch)
 
             accum_iter += self.batch_size
 
@@ -146,7 +144,7 @@ class AbstractTrainer(metaclass=ABCMeta):
                 self.log_extra_train_info(log_data)
                 self.logger_service.log_train(log_data)
 
-
+        print(tot_loss)
 
         return accum_iter
 

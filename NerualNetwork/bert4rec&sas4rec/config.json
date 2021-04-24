@@ -1,5 +1,5 @@
 {
-  "model_code": "bert",
+  "model_code": "sas",
   "mode": "train",
   "model_init_seed": 0,
 
@@ -29,12 +29,12 @@
   "device_idx" : "0",
 
   "optimizer" : "Adam",
-  "lr" : 0.0007,
+  "lr" : 0.001,
   "weight_decay" : 0,
   "momentum" : null,
   "decay_step": 50,
-  "gamma": 1,
-  "num_epochs": 500,
+  "gamma": 0.95,
+  "num_epochs": 200,
 
   "metric_ks" : [1, 5, 10, 20],
   "best_metric": "NDCG@10",
@@ -50,7 +50,7 @@
   "sas_max_len": 200,
   "sas_hidden_units": 64,
   "sas_num_blocks": 2,
-  "sas_heads": 2,
+  "sas_heads": 1,
   "sas_dropout": 0.2,
   "l2_emb": 0.0,
 

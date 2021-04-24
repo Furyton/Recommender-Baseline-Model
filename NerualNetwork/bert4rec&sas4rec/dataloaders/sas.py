@@ -137,6 +137,10 @@ class SASEvalDataset(data_utils.Dataset):
         user = self.users[index]
         seq = deepcopy(self.u2seq[user])
         answer = deepcopy(self.u2answer[user])
+
+        if user == 959:
+            print('here')
+
         negs = deepcopy(self.negative_samples[user])
 
         candidates = answer + negs
@@ -146,4 +150,4 @@ class SASEvalDataset(data_utils.Dataset):
         padding_len = self.max_len - len(seq)
         seq = [0] * padding_len + seq
 
-        return seq, candidates, torch.LongTensor(labels)
+        return np.array(seq, dtype=np.int32), np.array(candidates, dtype=np.int32), torch.LongTensor(labels)
