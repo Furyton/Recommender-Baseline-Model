@@ -3,6 +3,9 @@ from .base import AbstractDataloader
 import torch
 import torch.utils.data as data_utils
 from copy import deepcopy
+from multiprocessing import Process, Queue
+from collections import defaultdict, Counter
+import numpy as np
 
 
 class SASDataLoader(AbstractDataloader):
@@ -21,16 +24,16 @@ class SASDataLoader(AbstractDataloader):
         return train_loader, val_loader, test_loader
 
     def _get_train_loader(self):
-        dataset = self._get_train_dataset()
-        dataloader = data_utils.DataLoader(dataset, batch_size=self.args.train_batch_size,
-                                           shuffle=True, pin_memory=True, num_workers=self.worker_num)
+        dataloader = WarpSampler(user_train=self.train, item_num=self.item_count, batch_size=self.args.train_batch_size,
+                                 max_len=self.max_len, device=self.args.device, num_workers=self.worker_num)
+
         return dataloader
 
-    def _get_train_dataset(self):
-        dataset = SASTrainDataset(user_train=self.train, user_num=self.user_count, item_num=self.item_count,
-                                  max_len=self.max_len, rng=self.rng)
-
-        return dataset
+    # def _get_train_dataset(self):
+    #     dataset = SASTrainDataset(user_train=self.train, user_num=self.user_count, item_num=self.item_count,
+    #                               max_len=self.max_len, rng=self.rng)
+    #
+    #     return dataset
 
     def _get_val_loader(self):
         return self._get_eval_loader(mode='val')
@@ -59,49 +62,64 @@ class SASDataLoader(AbstractDataloader):
         return dataset
 
 
-class SASTrainDataset(data_utils.Dataset):
-    def __init__(self, user_train, user_num, item_num, max_len, rng):
-        self.user_train = user_train
-        self.user_num = user_num
-        self.item_num = item_num
-        self.max_len = max_len
-        self.rng = rng
-        self.users = range(len(user_train))
+def random_neq(l, r, exclusive: set, size):
+    a = list(set(range(l, r + 1)) - exclusive)
+    return [a[i] for i in np.random.randint(0, len(a), size=size)]
+
+
+def sample_function(user_train, item_num, batch_size, max_len, result_queue):
+    def sample():
+        train = user_train[np.random.randint(0, len(user_train))]
+        padding_len = max_len - len(train) + 1
+
+        seq = padding_len * [0] + train[:-1]
+        pos = padding_len * [0] + train[1:]
+        neg = padding_len * [0] + random_neq(l=0, r=item_num, exclusive=set(train), size=len(train) - 1)
+
+        return seq, pos, neg
+
+    while True:
+        one_batch = []
+        for i in range(batch_size):
+            one_batch.append(sample())
+
+        result_queue.put(zip(*one_batch))
+
+
+class WarpSampler(object):
+    def __init__(self, user_train, item_num, batch_size, max_len, device, num_workers=1):
+        self.cnt = 0
+        self.num_batch = len(user_train) // batch_size
+        self.result_queue = Queue(maxsize=num_workers * 10)
+        self.processors = []
+        self.device = device
+        for i in range(num_workers):
+            self.processors.append(
+                Process(target=sample_function, args=(
+                    user_train, item_num, batch_size, max_len, self.result_queue
+                ))
+            )
+            self.processors[-1].daemon = True
+            self.processors[-1].start()
+
+    def __iter__(self):
+        self.cnt = 0
+        return self
+
+    def __next__(self):
+        if self.cnt < self.num_batch:
+            self.cnt += 1
+            return self.result_queue.get()
+        else:
+            raise StopIteration
 
     def __len__(self):
-        return len(self.user_train)
+        return self.num_batch
 
-    def random_neq(self, l, r, s):
-        t = self.rng.randint(l, r)
-        while t in s:
-            t = self.rng.randint(l, r)
-        return t
-
-    def __getitem__(self, index):
-        user = self.users[index]
-
-        # seq = np.zeros([self.max_len], dtype=np.int32)
-        # os = np.zeros([self.max_len], dtype=np.int32)
-        # neg = np.zeros([self.max_len], dtype=np.int32)
-
-        seq = [0 for i in range(self.max_len)]
-        pos = [0 for i in range(self.max_len)]
-        neg = [0 for i in range(self.max_len)]
-        nxt = self.user_train[user][-1]
-        idx = self.max_len - 1
-
-        ts = set(self.user_train[user])
-        for i in reversed(self.user_train[user][:-1]):
-            seq[idx] = i
-            pos[idx] = nxt
-            if nxt != 0:
-                neg[idx] = self.random_neq(1, self.item_num, ts)
-            nxt = i
-            idx -= 1
-            if idx == -1:
-                break
-
-        return torch.LongTensor(seq), torch.LongTensor(pos), torch.LongTensor(neg)
+    def close(self):
+        for p in self.processors:
+            p.terminate()
+            p.join()
 
 
 class SASEvalDataset(data_utils.Dataset):

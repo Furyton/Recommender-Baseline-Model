@@ -8,7 +8,6 @@ from model import SASRec
 from tqdm import tqdm
 from utils import *
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_file', default='config.json', type=str)
@@ -96,7 +95,7 @@ if __name__ == '__main__':
         model.eval()
         t_test = evaluate(model, dataset, args)
         print('test (NDCG@10: %.4f, HR@10: %.4f, NDCG@5: %.4f, HR@5 %.4f, HR@1 %.4f)' % (
-        t_test[0], t_test[1], t_test[2], t_test[3], t_test[4]))
+            t_test[0], t_test[1], t_test[2], t_test[3], t_test[4]))
 
     # ce_criterion = torch.nn.CrossEntropyLoss()
     # https://github.com/NVIDIA/pix2pixHD/issues/9 how could an old bug appear again...

@@ -24,7 +24,12 @@ class BERTTrainer(AbstractTrainer):
     def log_extra_train_info(self, log_data):
         pass
 
+    def close_training(self):
+        pass
+
     def calculate_loss(self, batch):
+        batch = [x.to(self.device) for x in batch]
+
         seqs, labels = batch
         logits = self.model(seqs)  # B x T x V
 

@@ -49,6 +49,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
         self.logger_service = LoggerService(self.train_loggers, self.val_loggers)
         self.log_period_as_iter = args.log_period_as_iter
+        self.batch_size = args.train_batch_size
 
     @abstractmethod
     def add_extra_loggers(self):
@@ -71,6 +72,10 @@ class AbstractTrainer(metaclass=ABCMeta):
     def calculate_metrics(self, batch):
         pass
 
+    @abstractmethod
+    def close_training(self):
+        pass
+
     def train(self):
         accum_iter = 0
         self.validate(0, accum_iter)
@@ -85,6 +90,7 @@ class AbstractTrainer(metaclass=ABCMeta):
             'state_dict': (self._create_state_dict()),
         })
         self.writer.close()
+        self.close_training()
 
     def get_lr(self):
         for param_group in self.optimizer.param_groups:
@@ -98,12 +104,20 @@ class AbstractTrainer(metaclass=ABCMeta):
 
         iterator = self.train_loader if not self.args.show_process_bar else tqdm(self.train_loader)
 
+        tot_loss = 0.
+        tot_batch = 0
+
         for batch_idx, batch in enumerate(iterator):
-            batch_size = batch[0].size(0)
-            batch = [x.to(self.device) for x in batch]
+            # batch_size = batch[0].size(0)
+            # batch = [x.to(self.device) for x in batch]
 
             self.optimizer.zero_grad()
             loss = self.calculate_loss(batch)
+
+            tot_loss += loss.item()
+
+            tot_batch += 1
+
             loss.backward()
 
             self.optimizer.step()
@@ -112,8 +126,10 @@ class AbstractTrainer(metaclass=ABCMeta):
 
             if self.args.show_process_bar:
                 iterator.set_description('Epoch {}, loss {:.3f} '.format(epoch + 1, average_meter_set['loss'].avg))
+            else:
+                print("loss : ", tot_loss / tot_batch)
 
-            accum_iter += batch_size
+            accum_iter += self.batch_size
 
             self.writer.add_scalar("learning_rate", self.get_lr(), accum_iter)
 
@@ -129,6 +145,8 @@ class AbstractTrainer(metaclass=ABCMeta):
                 log_data.update(average_meter_set.averages())
                 self.log_extra_train_info(log_data)
                 self.logger_service.log_train(log_data)
+
+
 
         return accum_iter
 

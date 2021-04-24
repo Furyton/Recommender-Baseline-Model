@@ -1,7 +1,7 @@
 from .negative_samplers import negative_sampler_factory
 
 from abc import *
-import random
+from numpy import random
 import copy
 
 
@@ -12,7 +12,7 @@ class AbstractDataloader(metaclass=ABCMeta):
     def __init__(self, args, dataset):
         self.args = args
         seed = args.dataloader_random_seed
-        self.rng = random.Random(seed)  # rng.random(l, r) -> rand int \in [l, r]
+        self.rng = random  # rng.random(l, r) -> rand int \in [l, r - 1]
         save_folder = ''
         self.train = dataset[0]
         self.val = dataset[1]
