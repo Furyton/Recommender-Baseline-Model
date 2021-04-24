@@ -122,7 +122,7 @@ class SAS(nn.Module):
 
         final_feat = log_feats[:, -1, :]  # only use last QKV classifier, a waste
 
-        item_embs = self.item_emb(item_indices)  # (U, I, C)
+        item_embs = self.item_emb(torch.LongTensor(item_indices).to(self.dev))  # (U, I, C)
 
         logits = item_embs.matmul(final_feat.unsqueeze(-1)).squeeze(-1)
 
