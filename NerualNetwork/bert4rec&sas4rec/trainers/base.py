@@ -159,7 +159,6 @@ class AbstractTrainer(metaclass=ABCMeta):
             iterator = self.val_loader if not self.args.show_process_bar else tqdm(self.val_loader)
 
             for batch_idx, batch in enumerate(iterator):
-                batch = [x.to(self.device) for x in batch]
 
                 metrics = self.calculate_metrics(batch)
 
@@ -205,7 +204,6 @@ class AbstractTrainer(metaclass=ABCMeta):
             iterator = self.test_loader if not self.args.show_process_bar else tqdm(self.test_loader)
 
             for batch_idx, batch in enumerate(iterator):
-                batch = [x.to(self.device) for x in batch]
 
                 metrics = self.calculate_metrics(batch)
 
