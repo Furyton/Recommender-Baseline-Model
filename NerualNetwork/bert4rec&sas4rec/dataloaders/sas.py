@@ -146,4 +146,4 @@ class SASEvalDataset(data_utils.Dataset):
         padding_len = self.max_len - len(seq)
         seq = [0] * padding_len + seq
 
-        return torch.LongTensor(seq), torch.LongTensor(candidates), torch.LongTensor(labels)
+        return seq, candidates, torch.LongTensor(labels)
