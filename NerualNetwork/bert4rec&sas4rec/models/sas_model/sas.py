@@ -28,7 +28,7 @@ class SAS(nn.Module):
         self.device = args.device
 
         self.item_emb = torch.nn.Embedding(self.item_num + 1, args.sas_hidden_units, padding_idx=0)
-        self.pos_emb = torch.nn.Embedding(args.sas_max_len, args.sas_hidden_units)  # TO IMPROVE
+        self.pos_emb = torch.nn.Embedding(args.max_len, args.sas_hidden_units)  # TO IMPROVE
         self.emb_dropout = torch.nn.Dropout(p=args.sas_dropout)
 
         self.attention_layernorms = torch.nn.ModuleList()  # to be Q for self-attention
@@ -104,25 +104,12 @@ class SAS(nn.Module):
 
         return pos_logits, neg_logits  # pos_pred, neg_pred
 
-    def pred(self, log_seqs, item_indices):
-        log_feats = self.log2feats(log_seqs)
-
-        item_embs = self.item_emb(item_indices)
-
-        # logits = (item_embs * log_feats).sum(dim=-1)
-
-        logits = item_embs.matmul(log_feats.transpose(1, 2)).sum(dim=-1)
-
-        # pred = self.pos_sigmoid(logits)
-
-        return logits
-
     def predict(self, log_seqs, item_indices):  # for inference
         log_feats = self.log2feats(log_seqs)  # user_ids hasn't been used yet
 
         final_feat = log_feats[:, -1, :]  # only use last QKV classifier, a waste
 
-        item_embs = self.item_emb(item_indices)  # (U, I, C)
+        item_embs = self.item_emb(torch.LongTensor(item_indices).to(self.device))  # (U, I, C)
 
         logits = item_embs.matmul(final_feat.unsqueeze(-1)).squeeze(-1)
 

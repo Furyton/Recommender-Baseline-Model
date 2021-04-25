@@ -11,7 +11,7 @@ import numpy as np
 class SASDataLoader(AbstractDataloader):
     def __init__(self, args, dataset):
         super().__init__(args, dataset)
-        self.max_len = args.sas_max_len
+        self.max_len = args.max_len
 
     @classmethod
     def code(cls):
@@ -69,7 +69,7 @@ def random_neq(l, r, exclusive: set, size):
 
 def sample_function(user_train, item_num, batch_size, max_len, result_queue):
     def sample():
-        train = user_train[np.random.randint(0, len(user_train))]
+        train = user_train[np.random.randint(0, len(user_train))][-max_len:]
         padding_len = max_len - len(train) + 1
 
         seq = padding_len * [0] + train[:-1]
@@ -137,6 +137,10 @@ class SASEvalDataset(data_utils.Dataset):
         user = self.users[index]
         seq = deepcopy(self.u2seq[user])
         answer = deepcopy(self.u2answer[user])
+
+        if user == 959:
+            print('here')
+
         negs = deepcopy(self.negative_samples[user])
 
         candidates = answer + negs
@@ -146,4 +150,4 @@ class SASEvalDataset(data_utils.Dataset):
         padding_len = self.max_len - len(seq)
         seq = [0] * padding_len + seq
 
-        return torch.LongTensor(seq), torch.LongTensor(candidates), torch.LongTensor(labels)
+        return np.array(seq, dtype=np.int32), np.array(candidates, dtype=np.int32), torch.LongTensor(labels)

@@ -55,7 +55,7 @@ class SASTrainer(AbstractTrainer):
 
     def calculate_metrics(self, batch):
         seqs, candidates, labels = batch
-        logits = self.model.predict(seqs, candidates)
+        logits = self.model.predict(seqs.type(torch.long), candidates.type(torch.long))
 
         metrics = recalls_ndcgs_and_mrr_for_ks(logits, labels, self.metric_ks)
 

@@ -70,7 +70,7 @@ def dataloader_factory(args):
     if args.load_processed_dataset:
         dataset = cPickle.load(open(path.normpath(args.processed_dataset_path), 'rb'))
     else:
-        dataset = data_partition(args.data_name, args.bert_max_len, args.prop_sliding_window)
+        dataset = data_partition(args.data_name, args.max_len, args.prop_sliding_window)
 
         current_directory = path.dirname(__file__)
         parent_directory = path.split(current_directory)[0]
