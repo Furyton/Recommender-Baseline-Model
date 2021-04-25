@@ -61,8 +61,8 @@ class BPR(nn.Module):
     def __init__(self, user_num, item_num, factor_num):
         super(BPR, self).__init__()
 
-        self.embed_user = nn.Embedding(user_num, factor_num)
-        self.embed_item = nn.Embedding(item_num, factor_num)
+        self.embed_user = nn.Embedding(user_num + 1, factor_num, sparse=True)
+        self.embed_item = nn.Embedding(item_num + 1, factor_num, sparse=True)
 
         nn.init.normal_(self.embed_user.weight, std=0.01)
         nn.init.normal_(self.embed_item.weight, std=0.01)
@@ -114,12 +114,12 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
           candidate_num,
           model_dir=None, device='cpu'):
     print("== training ==")
-    train_data = [[x - 1 for x in l] for l in train_data]
-    answer_list = [[x - 1 for x in l] for l in answer_list]
-    candidates_list = [[x - 1 for x in l] for l in candidates_list]
+    # train_data = [[x - 1 for x in l] for l in train_data]
+    # answer_list = [[x - 1 for x in l] for l in answer_list]
+    # candidates_list = [[x - 1 for x in l] for l in candidates_list]
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(device_num)
-    train_loader = get_train_loader(get_train_dataset(train_data, item_num, user_num, data_len))
+    train_loader = get_train_loader(get_train_dataset(train_data, item_num, user_num, data_len, negative_num=100))
 
     model = BPR(user_num, item_num, dim)
 
@@ -154,7 +154,7 @@ def train(train_data, item_num, user_num, data_len, answer_list, candidates_list
 
     last_HIT = HIT[10]
 
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.SparseAdam(model.parameters(), lr=lr)
 
     for epoch in range(epoch_num):
         model.train()

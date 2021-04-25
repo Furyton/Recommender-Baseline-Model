@@ -54,14 +54,16 @@ def get_k_similar_items(sim_list: list, item_num, k_neighbors):
 
     for item_id in tqdm(range(item_num)):
         # l =
-        similar_items.append([key for key, value in sorted(sim_list[item_id].items(), key=lambda item: -item[1])][:k_neighbors])
+        similar_items.append(
+            [key for key, value in sorted(sim_list[item_id].items(), key=lambda item: -item[1])][:k_neighbors])
 
     print("== done ==")
 
     return similar_items
 
 
-def test(observed_list: list, answer_list: list, candidates_list: list, occur: dict, user_num: int, item_num: int, k_neighbors: int):
+def test(observed_list: list, answer_list: list, candidates_list: list, occur: dict, user_num: int, item_num: int,
+         k_neighbors: int):
     print("== testing ==")
     # minus 1, the item_id will start at 0
     observed_list = [[x - 1 for x in l] for l in observed_list]
@@ -87,19 +89,31 @@ def test(observed_list: list, answer_list: list, candidates_list: list, occur: d
 
         item_list = list(candidates)
 
-        # item_list.insert(np.random.randint(len(candidates)), answer[0])
-        item_list.insert(len(candidates), answer[0])
+        item_list.insert(np.random.randint(len(candidates)), answer[0])
+        # item_list.insert(len(candidates), answer[0])
 
         scores = {}
         z = 0
+        indices = []
+        max_similar_sum = 0.0
         for item_id in item_list:
             similar_observed_ids = list(set(similar_items[item_id]).intersection(observed))
             # similar_sum = np.take(sim_matrix[item_id], similar_observed_ids)
             similar_sum = [sim_list[item_id][key] for key in similar_observed_ids]
             scores[item_id] = sum(similar_sum)
+
+            if scores[item_id] > max_similar_sum:
+                max_similar_sum = scores[item_id]
+
             if len(similar_observed_ids) == 0:
                 z += 1
+
         zeros.append((scores[answer[0]], z))
+
+        for k, v in scores.items():
+            if v != 0.0:
+                scores[k] = np.random.rand() * max_similar_sum
+
         scores = [key for key, value in sorted(scores.items(), key=lambda item: -item[1])]
         rankings.append(scores.index(answer[0]))
 

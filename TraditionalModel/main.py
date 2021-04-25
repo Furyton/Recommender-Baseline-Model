@@ -1,5 +1,6 @@
 import ast
 # import BPRFM
+import math
 import os
 
 import BPR_pyTorch
@@ -9,6 +10,7 @@ import argparse
 import pickle
 import POP
 import itemKNN
+import BPR_noPytorch
 
 PATH = None
 
@@ -152,7 +154,7 @@ def get_data_len(dataset):
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser()
-    parse.add_argument('--model_type', required=True, type=str, choices=['bpr', 'knn', 'pop'],
+    parse.add_argument('--model_type', required=True, type=str, choices=['bpr', 'knn', 'pop', 'bpr_noPytorch'],
                        help='model\'s type, bpr, knn, pop')
     parse.add_argument('--dataset_path', default=None, type=str, help="training dataset path, e.g. "
                                                                    "'data/pop_test.txt' ")
@@ -170,7 +172,6 @@ if __name__ == '__main__':
     args = parse.parse_args()
 
     data = get_data(path=os.path.normpath(args.dataset_path))
-
 
     user_num = len(data)
 
@@ -201,7 +202,8 @@ if __name__ == '__main__':
         print('MRR: ', MRR)
     elif args.model_type == 'knn':
         predict_rank = itemKNN.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
-                                    user_num=user_num, item_num=max_item_id, k_neighbors=args.k, occur=popularity)
+                                    user_num=user_num, item_num=max_item_id, k_neighbors=args.k if args.k > 0 else
+                                    math.floor(math.sqrt(max_item_id)), occur=popularity)
 
         NDCG, HIT, MRR = evaluate(predict_rank)
 
@@ -216,6 +218,9 @@ if __name__ == '__main__':
         print('NDCG: ', NDCG)
         print('HIT: ', HIT)
         print('MRR: ', MRR)
+    elif args.model_type == 'bpr_noPytorch':
+        BPR_noPytorch.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
+                                  user_num=user_num, item_num=max_item_id)
 
     # BPR without pyTorch
     # BPRFM.test(observed_list=observed, answer_list=predict, candidates_list=candidates,
