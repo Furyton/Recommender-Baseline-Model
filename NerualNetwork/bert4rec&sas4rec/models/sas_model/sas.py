@@ -28,7 +28,7 @@ class SAS(nn.Module):
         self.device = args.device
 
         self.item_emb = torch.nn.Embedding(self.item_num + 1, args.sas_hidden_units, padding_idx=0)
-        self.pos_emb = torch.nn.Embedding(args.sas_max_len, args.sas_hidden_units)  # TO IMPROVE
+        self.pos_emb = torch.nn.Embedding(args.max_len, args.sas_hidden_units)  # TO IMPROVE
         self.emb_dropout = torch.nn.Dropout(p=args.sas_dropout)
 
         self.attention_layernorms = torch.nn.ModuleList()  # to be Q for self-attention

@@ -8,7 +8,7 @@ from copy import deepcopy
 class BertDataloader(AbstractDataloader):
     def __init__(self, args, dataset):
         super().__init__(args, dataset)
-        self.max_len = args.bert_max_len
+        self.max_len = args.max_len
         self.mask_prob = args.bert_mask_prob
         self.CLOZE_MASK_TOKEN = self.item_count + 1
 

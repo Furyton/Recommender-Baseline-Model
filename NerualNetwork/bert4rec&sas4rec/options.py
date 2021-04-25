@@ -80,8 +80,8 @@ parser.add_argument('--show_process_bar', type=bool, default=False, help='show t
 ################
 parser.add_argument('--model_code', type=str, default='bert', choices=MODELS.keys())
 parser.add_argument('--model_init_seed', type=int, default=None)
+parser.add_argument('--max_len', type=int, default=None, help='Length of sequence')
 # BERT #
-parser.add_argument('--bert_max_len', type=int, default=None, help='Length of sequence for bert')
 parser.add_argument('--bert_hidden_units', type=int, default=None, help='Size of hidden vectors (d_model)')
 parser.add_argument('--bert_num_blocks', type=int, default=None, help='Number of transformer layers')
 parser.add_argument('--bert_num_heads', type=int, default=None, help='Number of heads for multi-attention')
@@ -90,7 +90,6 @@ parser.add_argument('--bert_mask_prob', type=float, default=None, help='Probabil
 parser.add_argument('--bert_hidden_dropout', type=float, default=None)
 
 # SAS #
-parser.add_argument('--sas_max_len', type=int, default=200, help='Length of sequence for sas')
 parser.add_argument('--sas_hidden_units', type=int, default=64, help='Size of hidden vectors')
 parser.add_argument('--sas_num_blocks', type=int, default=2, help='Number of transformer layers')
 parser.add_argument('--sas_heads', type=int, default=2, help='Number of heads for multi-attention')
