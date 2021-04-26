@@ -1,0 +1,8 @@
+{
+  "dataset_name" : "Yelp_processed.txt",
+  "model_code" : "bpr",
+  "dim" : 64,
+  "iteration" : 20,
+  "learning_rate" : 0.01,
+  "regularization" : 0.0
+}

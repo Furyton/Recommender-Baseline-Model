@@ -3,7 +3,7 @@ from tqdm import tqdm
 import pickle
 
 latent_dim = 64
-learning_rate = 0.001
+learning_rate = 0.0001
 epochs = 200
 batch_size = 0
 init_mean = 0
@@ -12,6 +12,9 @@ reg_u = 0.0025
 reg_i = 0.0025
 reg_j = 0.00025
 reg_bias = 0
+
+decay = 0.9
+decay_step = 20
 
 p = None
 q = None
@@ -35,7 +38,7 @@ def predict_score(user, item):
 
 def update_factors(u, i, j):
     x_uij = bias[i] - bias[j] + (predict_score(u, i) - predict_score(u, j))
-    eps = 1 / (1 + np.exp(x_uij))
+    eps = 1 / (1 + np.exp(-x_uij))
 
     bias[i] += learning_rate * (eps - reg_bias * bias[i])
     bias[j] += learning_rate * (-eps - reg_bias * bias[j])
@@ -121,6 +124,10 @@ def test(observed_list: list, answer_list: list, candidates_list: list, user_num
     for n in range(epochs):
         # for user_id, items in tqdm(enumerate(observed_items)):
         # print("\nepoch: ", n)
+
+        if n % decay_step == 0:
+            global learning_rate
+            learning_rate *= decay
 
         for user_id in tqdm(range(len(observed_list)), desc='epoch: ' + str(n)):
             i, j = sampling(observed_list[user_id], item_num=item_num)
