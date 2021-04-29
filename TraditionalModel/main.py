@@ -207,7 +207,7 @@ if __name__ == '__main__':
     test = [[x - 1 for x in l] for l in test]
     candidates = [[x - 1 for x in l] for l in candidates]
 
-    model = models.get_model(args.model_code, args, train, test, candidates, user_num, item_num)
+    model = models.get_model(args.model_code, args, train, test, candidates, item_num, user_num)
 
     model.fit()
 
