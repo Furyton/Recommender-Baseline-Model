@@ -19,7 +19,7 @@ class BERTTrainer(AbstractTrainer):
             dataiter = iter(self.train_loader)
             seqs, labels = dataiter.next()
 
-            self.writer.add_graph(self.model, seqs)
+            self.writer.add_graph(self.model, seqs.to(self.device))
 
     def log_extra_train_info(self, log_data):
         pass
