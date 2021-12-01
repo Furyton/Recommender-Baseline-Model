@@ -32,7 +32,7 @@ the config file `config.json` is all you need to change
 
 dataset part
 
-```json
+```txt
 load_processed_dataset: the dataset you put in the `Data` will be processed into .pkl, 
                         you can load it for saving time. true or false, e.g. false
 processed_dataset_path: absolute path, e.g. "C:processed/ml.pkl"
@@ -64,7 +64,7 @@ test_negative_sampling_seed: 0
 
 training part
 
-```json
+```txt
 
 mode: train or test, e.g. "train"
 
@@ -97,7 +97,7 @@ show_process_bar: show the processing bar when training or testing, true or fals
 
 model part
 
-```json
+```txt
 
 model_code: bert or sas
 
