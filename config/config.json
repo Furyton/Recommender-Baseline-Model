@@ -1,0 +1,63 @@
+{
+    "experiment_dir": "_train",
+    "experiment_description": "train_ml_10m",
+    "dataset_name": "ml-10m.csv",
+    
+    "lr": 0.001,
+    "num_epochs": 200,
+  
+    "mode": "train",
+    "mentor_model": "pop",
+    "enable_sample": false,
+    "samples_ratio": 0.1,
+    "training_stage": "fine",
+  
+    "test_model_path": null,
+    "model_state_path": null,
+  
+    "model_code": "bert",
+    "max_len": 30,
+    "embed_size": 64,
+    "hidden_units": 64,
+    "num_heads": 2,
+    "hidden_dropout": 0.2,
+    "attention_dropout": 0.2,
+    "prop_sliding_window": 0.3,
+
+    "dataloader_type": "mask",
+
+    "bert_num_blocks": 2,
+    "bert_mask_prob": 0.3,
+
+    "train_batch_size": 64,
+    "val_batch_size": 64,
+    "test_batch_size": 64,
+    
+    "worker_number": 2,
+
+    "min_length": 10,
+    
+    "train_negative_sampler_code": "popular",
+    "train_negative_sample_size": 0,
+    "train_negative_sampling_seed": 98765,
+    "test_negative_sampler_code": "random",
+    "test_negative_sample_size": 0,
+    "test_negative_sampling_seed": 98765,
+    
+    "model_init_seed": 12345,
+    
+    "device": "cuda",
+    "num_gpu": 1,
+    "device_idx": "0",
+    
+    "optimizer": "Adam",
+    "weight_decay": 1e-4,
+    "decay_step": 50,
+    "gamma": 0.99,
+  
+    "metric_ks": [10],
+    "best_metric": "NDCG@10",
+    "show_process_bar": false,
+  
+    "validation_rate": 0.2
+}
