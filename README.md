@@ -9,6 +9,7 @@ I found there is a lot of place that needs improvement in that branch. And I hav
 ## TODO
 
 - refactor some confusing code
+- add a general way to do model ensembling
 - add some easy-to-use log functions for debugging
 - redesign the model part
 - make the pipeline part more intuitive
